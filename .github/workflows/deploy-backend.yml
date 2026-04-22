@@ -1,0 +1,29 @@
+name: Deploy Backend
+
+on:
+  push:
+    branches:
+      - master # or the backend branch
+
+jobs:
+  ftp-deploy:
+    name: Upload via FTP
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Deploy files to FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        with:
+          server: ftp.amcatd.com.br
+          username: amcatd2
+          password: Stefanini@2025
+          server-dir: /public_html/api/
+          local-dir: ./
+          exclude: |
+            **/.git*
+            **/_dotnet*
+          include: |
+            **/*
