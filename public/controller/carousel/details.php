@@ -38,37 +38,41 @@ $token = str_replace('Bearer ', '', $authorization);
 
 // include database and object files
 include_once '../../../app/database/Connection.php';
-include_once '../../model/mini_title.php';
- 
+include_once '../../model/carousel.php';
+include_once '../../utils/utils.php';
+
 // instantiate database and object
 $conn = new Connection();
 $db = $conn->connect();
 
-try {        
-    $decoded = JWT::decode($token, new Key($_SERVER['KEY'], 'HS256'));
+try {
+    // $decoded = JWT::decode($token, new Key($_SERVER['KEY'], 'HS256'));
 
     // initialize object
-    $miniTitle = new MiniTitle($db); 
-    
-    // Get JSON input
-    $json = file_get_contents('php://input');
-    $data = json_decode($json, true);    
+    $carousel = new Carousel($db); 
+    $utils = new Utils();     
 
-    // Check if record already exists
-    if ($miniTitle->existsByTitle($data['title_01'])) {
-        echo json_encode([
-          "message" => "record_already_exists"
-        ]);
-        exit;
+    // parameters
+    $id = filter_input(INPUT_GET, 'id', FILTER_DEFAULT);
+    $id = "$id";
+
+    $stmt = $carousel->getById($id);
+
+    if (is_array($stmt)) {
+        $num = count($stmt);
+    } else {
+        $num = $stmt->rowCount();
     }
 
-    if ($miniTitle->create($data)) {
-        echo json_encode(['mini_title' => []]);
+    $stmt = $utils->utf8ize($stmt);
+    
+    if($num > 0) {
+        echo json_encode(['carousel' => [$stmt]]);
     } else {
-        echo json_encode(array("message" => "error_creating_register"));
-    }    
+        echo json_encode(array("message" => "record_does_not_exist"));
+    } 
 } catch (Throwable $e) {
     http_response_code(401);
-    die('EXPIRED');
+    die('EXPIRED' . $e);
 }
-?>
+?> 

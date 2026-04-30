@@ -59,21 +59,33 @@ try {
     $search = filter_input(INPUT_GET, 'search', FILTER_DEFAULT);
     $search = "%$search%"; // Add wildcards for LIKE search
 
-    $stmt = $group->search($search);
+    $page = isset($_GET['page']) ? intval($_GET['page']) : 1;
+    $limit = isset($_GET['limit']) ? intval($_GET['limit']) : 9999;
+    $offset = ($page - 1) * $limit;
 
-    if (is_array($stmt)) {
-        $num = count($stmt);
+    $stmt_pag = $group->search($search, $limit, $offset);
+    $total = is_array($stmt_pag) ? count($stmt_pag) : $stmt_pag->rowCount();
+
+    if (is_array($stmt_pag)) {
+        $num = count($stmt_pag);
     } else {
-        $num = 0;
+        $num = $stmt_pag->rowCount();
     }
 
-    $stmt = $utils->utf8ize($stmt);
-    
-    if($num > 0) {
-        echo json_encode(['group' => [$stmt]]);
+    // check if more than 0 record found
+    if($total > 0) {
+        echo json_encode([
+            'group' => $stmt_pag, 
+            "total" => $total, 
+            "page" => $page, 
+            "totalPages" => ceil($total / $limit), 
+            "limit" => $limit
+        ]);
     } else {
-        echo json_encode(array("message" => "record_does_not_found"));
-    }
+        echo json_encode(
+            array("message" => "record_does_not_exist")
+        );
+    }  
 } catch (Throwable $e) {
     http_response_code(401);
     die('EXPIRED');

@@ -52,7 +52,13 @@ try {
     $user = new User($db); 
     $utils = new Utils(); 
 
+    $page = isset($_GET['page']) ? intval($_GET['page']) : 1;
+    $limit = isset($_GET['limit']) ? intval($_GET['limit']) : 9999;
+    $offset = ($page - 1) * $limit;
+
     $stmt = $user->getAll();
+    $stmt_pag = $user->getPagination($limit, $offset);
+    $total = is_array($stmt) ? count($stmt) : $stmt->rowCount();
 
     if (is_array($stmt)) {
         $num = count($stmt);
@@ -64,12 +70,18 @@ try {
 
     // check if more than 0 record found
     if($num > 0) {    
-        echo json_encode(['user' => $stmt]);
+        echo json_encode([
+            'user' => $stmt_pag,
+            "total" => $total,
+            "page" => $page,
+            "totalPages" => ceil($total / $limit),
+            "limit" => $limit
+        ]);
     } else {
         echo json_encode(
             array("message" => "record_does_not_exist")
         );
-    }    
+    }   
 } catch (Throwable $e) {
   http_response_code(401);
   die('EXPIRED');

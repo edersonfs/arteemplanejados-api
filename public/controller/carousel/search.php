@@ -16,7 +16,7 @@ if (isset($_SERVER['HTTP_ORIGIN'])) {
 // Access-Control headers are received during OPTIONS requests
 if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
     if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_METHOD']))
-        header("Access-Control-Allow-Methods: GET, POST, OPTIONS, DELETE");         
+        header("Access-Control-Allow-Methods: GET, POST, OPTIONS");         
 
     if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']))
         header("Access-Control-Allow-Headers: {$_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']}");
@@ -34,12 +34,12 @@ $dotenv = Dotenv\Dotenv::createImmutable(dirname(__FILE__, 4));
 $dotenv->load();
 
 $authorization = $_SERVER['HTTP_AUTHORIZATION'];
-
 $token = str_replace('Bearer ', '', $authorization);
 
 // include database and object files
 include_once '../../../app/database/Connection.php';
-include_once '../../model/mini_title.php';
+include_once '../../model/carousel.php';
+include_once '../../utils/utils.php';
 
 // instantiate database and object
 $conn = new Connection();
@@ -48,32 +48,46 @@ $db = $conn->connect();
 try {
     $decoded = JWT::decode($token, new Key($_SERVER['KEY'], 'HS256'));
 
-    // initialize object
-    $miniTitle = new MiniTitle($db);    
+    // Get search term parameter
+    $searchTerm = isset($_GET['search_term']) ? $_GET['search_term'] : '';
 
-    $id = filter_input(INPUT_GET, 'id', FILTER_DEFAULT);    
+    // Initialize object
+    $carousel = new Carousel($db);
+    $utils = new Utils();
+    
+    // parameters
+    $search = filter_input(INPUT_GET, 'search', FILTER_DEFAULT);
+    $search = "%$search%"; // Add wildcards for LIKE search
 
-    if (!$id) {
-        echo json_encode(array("message" => "missing_data_id"));
-        exit;
-    }
-    
-    // Set the ID property
-    $miniTitle->id = $id;
-    
-    // Check if record exists
-    if($miniTitle->getById($id)) {
-        // Delete the record
-        if($miniTitle->delete($id)) {
-            echo json_encode(array("message" => "success"));
-        } else {
-            echo json_encode(array("message" => "error"));
-        }
+    $page = isset($_GET['page']) ? intval($_GET['page']) : 1;
+    $limit = isset($_GET['limit']) ? intval($_GET['limit']) : 9999;
+    $offset = ($page - 1) * $limit;
+
+    $stmt_pag = $carousel->search($search, $limit, $offset);
+    $total = is_array($stmt_pag) ? count($stmt_pag) : $stmt_pag->rowCount();
+
+    if (is_array($stmt_pag)) {
+        $num = count($stmt_pag);
     } else {
-        echo json_encode(array("message" => "record_does_not_exist"));
+        $num = $stmt_pag->rowCount();
     }
+
+    // check if more than 0 record found
+    if($total > 0) {
+        echo json_encode([
+            'carousel' => $stmt_pag, 
+            "total" => $total, 
+            "page" => $page, 
+            "totalPages" => ceil($total / $limit), 
+            "limit" => $limit
+        ]);
+    } else {
+        echo json_encode(
+            array("message" => "record_does_not_exist")
+        );
+    }     
 } catch (Throwable $e) {
     http_response_code(401);
-    die('EXPIRED');
+    die('EXPIRED' . $e);
 }
 ?> 

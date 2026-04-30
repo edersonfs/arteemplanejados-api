@@ -100,6 +100,33 @@ class Group {
         return $items;
     }
 
+    public function getPagination($limit, $offset) {
+        $query = "
+             SELECT 
+                gr.id as id,
+                gr.name as name,            
+                gr.updated_user_id as updated_user_id, 
+                gr.updated_date as updated_date, 
+                upus.name as updated_user_name 
+            FROM 
+                `" . $this->table_name . "` gr 
+                inner join `user` upus on gr.updated_user_id = upus.id 
+                inner join `user` crus on gr.created_user_id = crus.id
+            ORDER BY gr.name
+            LIMIT $limit OFFSET $offset";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
+        
+        $items = [];
+
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $items[] = $row;
+        }
+        
+        return $items;
+    }
+
     public function getById($id) {
         $query = "
             SELECT 
@@ -123,7 +150,7 @@ class Group {
         return $stmt->fetch(PDO::FETCH_ASSOC);
     } 
 
-    public function search($search) {
+    public function search($search, $limit, $offset) {
         $query = "
             SELECT 
                 gr.id as id,
@@ -136,13 +163,20 @@ class Group {
                 inner join `user` upus on gr.updated_user_id = upus.id 
                 inner join `user` crus on gr.created_user_id = crus.id
             WHERE 
-                LOWER(gr.name) LIKE LOWER(:search)
-            ORDER BY gr.name";    
+                LOWER(gr.name) LIKE LOWER('%$search%')
+            ORDER BY gr.name
+            LIMIT $limit OFFSET $offset";    
 
-        $stmt = $this->conn->prepare( $query );
-        $stmt->execute(['search' => $search]);
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute();
+            
+            $items = [];
     
-        return $stmt->fetch(PDO::FETCH_ASSOC);
+            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                $items[] = $row;
+            }
+            
+            return $items;
     }
 
     // VALIDATIONS

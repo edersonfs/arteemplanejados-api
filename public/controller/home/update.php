@@ -53,68 +53,31 @@ try {
     // initialize object
     $home = new Home($db);  
     
-    // Get PUT data
-    $data = $_POST;
-    $files = $_FILES;
+    // Get ID parameter from PUT data
+    $putData = file_get_contents("php://input");
+    $data = json_decode($putData, true);
 
-    $oldUser = $home->getById($_POST['id']);
+    $id = $data['id'] ?? null;
     
-    // Handle top image upload if provided
-    $image_file = $oldUser['image_file'];
-    $image_path = $oldUser['image_path'];
-
-    // Handle file upload
-    if (isset($_FILES['image_file']) && $_FILES['image_file']['error'] === UPLOAD_ERR_OK) {
-        $uploadDir = dirname(__FILE__, 3) . '/wwwroot/images/';
-        
-        // Create directory if it doesn't exist
-        if (!file_exists($uploadDir)) {
-            mkdir($uploadDir, 0777, true);
-        }
-
-        // Get file information
-        $fileName = basename($_FILES['image_file']['name']);
-        $targetPath = $uploadDir . $fileName;
-        
-        // Move uploaded file to target directory
-        if (move_uploaded_file($_FILES['image_file']['tmp_name'], $targetPath)) {
-            $image_file = $fileName;
-            $image_path = 'wwwroot/images/' . $fileName;
-        } else {
-            http_response_code(500);
-            die('Error uploading file');
-        }
+    if (!$id) {
+        http_response_code(400);
+        die('ID parameter is required');
     }
 
-    // Prepare data for update - use $_REQUEST instead of $_POST
-    $data = [
-        'id' => $_POST['id'] ?? null,
-        'mini_title_id' => $_POST['mini_title_id'] ?? null,
-        'title' => $_POST['title'] ?? null,
-        'sub_title' => $_POST['sub_title'] ?? null,
-        'content' => $_POST['content'] ?? null,
-        'video' => $_POST['video'] ?? null,
-        'button' => $_POST['button'] ?? null,
-        'active' => $_POST['active'] ?? null,
-        'image_file' => $image_file,
-        'image_path' => $image_path,  
-        'updated_user_id' => $_POST['updated_user_id'] ?? null,
-        'updated_date' => date('Y-m-d H:i:s')
-    ];  
-
     // Check if record already exists
-    if ($home->existsByTitleWhenEdit($data['title'], $data['id'])) {
-      echo json_encode([
+    if ($home->existsByDescriptionWhenEdit($data['description'], $data['id'])) {
+        echo json_encode([
           "message" => "record_already_exists"
-      ]);
-      exit;
-    } 
-
-    if($home->update($data)) {         
+        ]);
+        exit;
+    }
+    
+    // Update record without image
+    if ($home->update($data)) {
         echo json_encode(['home' => []]);
     } else {
-        echo json_encode(array("message" => "error_updating_record"));
-    }   
+        echo json_encode(['message' => 'error_updating_record']);
+    }
 } catch (Throwable $e) {
     http_response_code(401);
     die('EXPIRED');

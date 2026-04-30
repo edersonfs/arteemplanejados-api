@@ -38,7 +38,7 @@ $token = str_replace('Bearer ', '', $authorization);
 
 // include database and object files
 include_once '../../../app/database/Connection.php';
-include_once '../../model/mini_title.php';
+include_once '../../model/carousel.php';
 include_once '../../utils/utils.php';
 
 // instantiate database and object
@@ -46,17 +46,19 @@ $conn = new Connection();
 $db = $conn->connect();
 
 try {
-    $decoded = JWT::decode($token, new Key($_SERVER['KEY'], 'HS256'));
+    // $decoded = JWT::decode($token, new Key($_SERVER['KEY'], 'HS256'));
 
     // initialize object
-    $miniTitle = new MiniTitle($db); 
-    $utils = new Utils();     
+    $carousel = new Carousel($db); 
+    $utils = new Utils();
 
-    // parameters
-    $id = filter_input(INPUT_GET, 'id', FILTER_DEFAULT);
-    $id = "$id";
+    $page = isset($_GET['page']) ? intval($_GET['page']) : 1;
+    $limit = isset($_GET['limit']) ? intval($_GET['limit']) : 9999;
+    $offset = ($page - 1) * $limit;
 
-    $stmt = $miniTitle->getById($id);
+    $stmt = $carousel->getAll();
+    $stmt_pag = $carousel->getPagination($limit, $offset);
+    $total = is_array($stmt) ? count($stmt) : $stmt->rowCount();
 
     if (is_array($stmt)) {
         $num = count($stmt);
@@ -65,14 +67,23 @@ try {
     }
 
     $stmt = $utils->utf8ize($stmt);
-    
-    if($num > 0) {
-        echo json_encode(['mini_title' => [$stmt]]);
+
+    // check if more than 0 record found
+    if($num > 0) {    
+        echo json_encode([
+            'carousel' => $stmt_pag,
+            "total" => $total,
+            "page" => $page,
+            "totalPages" => ceil($total / $limit),
+            "limit" => $limit
+        ]);
     } else {
-        echo json_encode(array("message" => "record_does_not_exist"));
-    } 
+        echo json_encode(
+            array("message" => "record_does_not_exist")
+        );
+    }   
 } catch (Throwable $e) {
     http_response_code(401);
-    die('EXPIRED');
+    die('EXPIRED' . $e);
 }
 ?> 

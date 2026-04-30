@@ -97,6 +97,7 @@ class User {
             SELECT 
                 us.id as id, 
                 gr.id as group_id,
+                gr.name as group_name,
                 us.name as name, 
                 us.email as email, 
                 us.active as active, 
@@ -125,6 +126,43 @@ class User {
         }
 
         return $users;
+    }
+
+    public function getPagination($limit, $offset) {
+        $query = "
+             SELECT 
+                us.id as id, 
+                gr.id as group_id,
+                gr.name as group_name,
+                us.name as name, 
+                us.email as email, 
+                us.active as active, 
+                us.image_file as image_file,
+                us.image_path as image_path,
+                us.created_user_id as created_user_id, 
+                us.created_date as created_date, 
+                crus.name as created_user_name,
+                us.updated_user_id as updated_user_id, 
+                us.updated_date as updated_date, 
+                upus.name as updated_user_name 
+            FROM 
+                `" . $this->table_name . "` us
+                inner join `group` gr on us.group_id = gr.id
+                inner join `user` upus on us.updated_user_id = upus.id 
+                inner join `user` crus on us.created_user_id = crus.id
+            ORDER BY us.created_date DESC
+            LIMIT $limit OFFSET $offset";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
+        
+        $items = [];
+
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $items[] = $row;
+        }
+        
+        return $items;
     }
 
     public function getById($id) {    
@@ -156,7 +194,7 @@ class User {
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function search($search) {
+    public function search($search, $limit, $offset) {
         $query = "
             SELECT 
                 us.id as id, 
@@ -175,15 +213,22 @@ class User {
                 inner join `group` gr on us.group_id = gr.id
                 inner join `user` upus on us.id = upus.id 
             WHERE 
-                LOWER(us.name) LIKE LOWER(:search) 
-                OR LOWER(us.email) LIKE LOWER(:search)
-                OR LOWER(gr.name) LIKE LOWER(:search)
-            ORDER BY us.name";    
+                LOWER(us.name) LIKE LOWER('%$search%') 
+                OR LOWER(us.email) LIKE LOWER('%$search%')
+                OR LOWER(gr.name) LIKE LOWER('%$search%')
+            ORDER BY us.name
+            LIMIT $limit OFFSET $offset";    
 
-        $stmt = $this->conn->prepare( $query );
-        $stmt->execute(['search' => $search]);
-    
-        return $stmt->fetch(PDO::FETCH_ASSOC);
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
+        
+        $items = [];
+
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $items[] = $row;
+        }
+        
+        return $items;
     }
 
     // VALIDATIONS

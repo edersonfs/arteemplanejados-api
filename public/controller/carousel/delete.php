@@ -16,7 +16,7 @@ if (isset($_SERVER['HTTP_ORIGIN'])) {
 // Access-Control headers are received during OPTIONS requests
 if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
     if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_METHOD']))
-        header("Access-Control-Allow-Methods: GET, POST, OPTIONS");         
+        header("Access-Control-Allow-Methods: GET, POST, OPTIONS, DELETE");         
 
     if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']))
         header("Access-Control-Allow-Headers: {$_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']}");
@@ -34,12 +34,12 @@ $dotenv = Dotenv\Dotenv::createImmutable(dirname(__FILE__, 4));
 $dotenv->load();
 
 $authorization = $_SERVER['HTTP_AUTHORIZATION'];
+
 $token = str_replace('Bearer ', '', $authorization);
 
 // include database and object files
 include_once '../../../app/database/Connection.php';
-include_once '../../model/mini_title.php';
-include_once '../../utils/utils.php';
+include_once '../../model/carousel.php';
 
 // instantiate database and object
 $conn = new Connection();
@@ -48,34 +48,29 @@ $db = $conn->connect();
 try {
     $decoded = JWT::decode($token, new Key($_SERVER['KEY'], 'HS256'));
 
-    // Get search term parameter
-    $searchTerm = isset($_GET['search_term']) ? $_GET['search_term'] : '';
+    // initialize object
+    $carousel = new Carousel($db);    
 
-    // Initialize object
-    $miniTitle = new MiniTitle($db);
-    $utils = new Utils();
-    
-    // parameters
-    $search = filter_input(INPUT_GET, 'search', FILTER_DEFAULT);
-    $search = "%$search%"; // Add wildcards for LIKE search
+    $id = filter_input(INPUT_GET, 'id', FILTER_DEFAULT);    
 
-    $stmt = $miniTitle->search($search);
-
-    if (is_array($stmt)) {
-        $num = count($stmt);
-    } else {
-        $num = 0;
+    if (!$id) {
+        echo json_encode(array("message" => "missing_data_id"));
+        exit;
     }
-
-    $stmt = $utils->utf8ize($stmt);
     
-    if($num > 0) {
-        echo json_encode(['mini_title' => [$stmt]]);
+    $carousel->id = $id;
+    
+    if($carousel->getById($id)) {
+        if($carousel->delete($id)) {
+            echo json_encode(array("message" => "success"));
+        } else {
+            echo json_encode(array("message" => "error"));
+        }
     } else {
-        echo json_encode(array("message" => "record_does_not_found"));
+        echo json_encode(array("message" => "record_does_not_exist"));
     }
 } catch (Throwable $e) {
     http_response_code(401);
-    die('EXPIRED' . $e);
+    die('EXPIRED');
 }
 ?> 

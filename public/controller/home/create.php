@@ -50,55 +50,18 @@ try {
     // initialize object
     $home = new Home($db);    
 
-    // Handle file upload
-    if (isset($_FILES['image_file']) && $_FILES['image_file']['error'] === UPLOAD_ERR_OK) {
-        $uploadDir = dirname(__FILE__, 3) . '/wwwroot/images/';
-        
-        if (!file_exists($uploadDir)) {
-            mkdir($uploadDir, 0777, true);
-        }
+    // Get JSON input
+    $json = file_get_contents('php://input');
+    $data = json_decode($json, true);
 
-        $fileName = basename($_FILES['image_file']['name']);
-        $targetPath = $uploadDir . $fileName;
-        
-        if (move_uploaded_file($_FILES['image_file']['tmp_name'], $targetPath)) {
-            $image_file = $fileName;
-            $image_path = 'wwwroot/images/' . $fileName;
-        } else {
-            http_response_code(500);
-            die('Error uploading file');
-        }
-    } else {
-        $image_file = null;
-        $image_path = null;
-    }
-
-    // Prepare data for insertion
-    $data = [
-        'mini_title_id' => $_POST['mini_title_id'] ?? null,
-        'title' => $_POST['title'] ?? null,
-        'sub_title' => $_POST['sub_title'] ?? null,
-        'content' => $_POST['content'] ?? null,
-        'image_file' => $image_file,
-        'image_path' => $image_path,
-        'video' => $_POST['video'] ?? null,
-        'button' => $_POST['button'] ?? null,
-        'active' => $_POST['active'] ?? null,
-        'created_user_id' => $_POST['created_user_id'] ?? null,
-        'created_date' => $_POST['created_date'] ?? null,
-        'updated_user_id' => $_POST['updated_user_id'] ?? null,
-        'updated_date' => $_POST['updated_date'] ?? null
-    ];
-
-    // Check if home already exists
-    if ($home->existsByTitle($data['title'])) {
+    // Check if record already exists
+    if ($home->existsByDescription($data['description'])) {
         echo json_encode([
           "message" => "record_already_exists"
-      ]);
-      exit;
+        ]);
+        exit;
     }
 
-    // Create new home
     if ($home->create($data)) {
         echo json_encode(['home' => []]);
     } else {
