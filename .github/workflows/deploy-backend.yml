@@ -3,7 +3,7 @@ name: Deploy Backend
 on:
   push:
     branches:
-      - master # or the backend branch
+      - main # or the backend branch
 
 jobs:
   ftp-deploy:
@@ -17,9 +17,9 @@ jobs:
       - name: Deploy files to FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
-          server: ftp.amcatd.com.br
-          username: amcatd2
-          password: Stefanini@2025
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
           server-dir: /public_html/api/
           local-dir: ./
           exclude: |

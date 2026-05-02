@@ -24,7 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
     exit(0);
 }
 
-// required header
+// required headers
 header("Access-Control-Allow-Origin: *");
 header('Access-Control-Allow-Credentials: true');
 header("Access-Control-Allow-Methods: HEAD, GET, POST, PUT, PATCH, DELETE, OPTIONS");
@@ -38,53 +38,53 @@ $token = str_replace('Bearer ', '', $authorization);
 
 // include database and object files
 include_once '../../../app/database/Connection.php';
-include_once '../../model/home.php';
+include_once '../../model/contact.php';
 include_once '../../utils/utils.php';
- 
-// instantiate database and category object
+
+// instantiate database and object
 $conn = new Connection();
 $db = $conn->connect();
 
-try {        
-    // $decoded = JWT::decode($token, new Key($_SERVER['KEY'], 'HS256'));
+try {
+    $decoded = JWT::decode($token, new Key($_SERVER['KEY'], 'HS256'));
 
-    // initialize object
-    $home = new Home($db); 
-    $utils = new Utils(); 
+    $searchTerm = isset($_GET['search_term']) ? $_GET['search_term'] : '';
+
+    $contact = new Contact($db);
+    $utils = new Utils();
+    
+    $search = filter_input(INPUT_GET, 'search', FILTER_DEFAULT);
+    $search = "%$search%";
 
     $page = isset($_GET['page']) ? intval($_GET['page']) : 1;
     $limit = isset($_GET['limit']) ? intval($_GET['limit']) : 9999;
     $offset = ($page - 1) * $limit;
 
-    $stmt = $home->getAll();
-    $stmt_pag = $home->getPagination($limit, $offset);
-    $total = is_array($stmt) ? count($stmt) : $stmt->rowCount();
+    $stmt_pag = $contact->search($search, $limit, $offset);
+    $total = is_array($stmt_pag) ? count($stmt_pag) : $stmt_pag->rowCount();
 
-    if (is_array($stmt)) {
-        $num = count($stmt);
+    if (is_array($stmt_pag)) {
+        $num = count($stmt_pag);
     } else {
-        $num = $stmt->rowCount();
+        $num = $stmt_pag->rowCount();
     }
 
-    $stmt = $utils->utf8ize($stmt);
-
     // check if more than 0 record found
-    if($num > 0) {    
+    if($total > 0) {
         echo json_encode([
-            'home' => $stmt_pag,
-            "total" => $total,
-            "page" => $page,
-            "totalPages" => ceil($total / $limit),
+            'contact' => $stmt_pag, 
+            "total" => $total, 
+            "page" => $page, 
+            "totalPages" => ceil($total / $limit), 
             "limit" => $limit
         ]);
     } else {
         echo json_encode(
             array("message" => "record_does_not_exist")
         );
-    }  
+    }     
 } catch (Throwable $e) {
-  http_response_code(401);
-  die('EXPIRED' . $e);
+    http_response_code(401);
+    die('EXPIRED' . $e);
 }
-
-?>
+?> 
