@@ -40,15 +40,15 @@ try {
     $mail->isSMTP();
     $mail->Host       = 'smtp.gmail.com';
     $mail->SMTPAuth   = true;
-    $mail->Username   = 'amcatd.bh@gmail.com';       // your Gmail address
-    $mail->Password   = 'gwny wgfz uvjj uxvh'; // 'xvpu qhwg nzre xcxl';         // your Gmail App Password
+    $mail->Username   = 'arteemplanejadosbr@gmail.com';       // your Gmail address
+    $mail->Password   = 'rqrq gify lzxk nqkd'; // 'xvpu qhwg nzre xcxl';         // your Gmail App Password
     $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
     $mail->Port       = 587;
 
     // === Sender & recipient ===
-    $mail->setFrom('amcatd.bh@gmail.com', 'AMCATD');
+    $mail->setFrom('arteemplanejadosbr@gmail.com', 'Arte em Planejados');
     $mail->addAddress($data['email'], $data['name']);
-    $mail->addAddress('amcatd.bh@gmail.com', 'AMCATD');
+    $mail->addAddress('arteemplanejadosbr@gmail.com', 'Arte em Planejados');
 
     // === Email content ===
     $mail->isHTML(true);

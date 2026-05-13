@@ -34,7 +34,7 @@ $authorization = $_SERVER['HTTP_AUTHORIZATION'];
 $token = str_replace('Bearer ', '', $authorization);
 
 include_once '../../../app/database/Connection.php';
-include_once '../../model/about_us.php';
+include_once '../../model/client.php';
 
 $conn = new Connection();
 $db = $conn->connect();
@@ -42,53 +42,58 @@ $db = $conn->connect();
 try {
     $decoded = JWT::decode($token, new Key($_SERVER['KEY'], 'HS256'));
 
-    $aboutUs = new AboutUs($db);
+    $client = new Client($db);
 
-    if (isset($_FILES['image_file']) && $_FILES['image_file']['error'] === UPLOAD_ERR_OK) {
-        $uploadDir = dirname(__FILE__, 3) . '/wwwroot/images/';
-
-        if (!file_exists($uploadDir)) {
-            mkdir($uploadDir, 0777, true);
-        }
-
-        $fileName = basename($_FILES['image_file']['name']);
-        $targetPath = $uploadDir . $fileName;
-
-        if (move_uploaded_file($_FILES['image_file']['tmp_name'], $targetPath)) {
-            $image_file = $fileName;
-            $image_path = 'wwwroot/images/' . $fileName;
-        } else {
-            http_response_code(500);
-            die('Error uploading file');
-        }
-    } else {
-        $image_file = null;
-        $image_path = null;
+    $uploadDir = dirname(__FILE__, 3) . '/wwwroot/images/';
+    if (!file_exists($uploadDir)) {
+        mkdir($uploadDir, 0777, true);
     }
 
-    $data = [
-        'title' => $_POST['title'] ?? null,
-        'little_description' => $_POST['little_description'] ?? null,
+    $imageData = [];
+    foreach (Client::imageFieldPairs() as $pair) {
+        $fn = $pair['file'];
+        if (isset($_FILES[$fn]) && $_FILES[$fn]['error'] === UPLOAD_ERR_OK) {
+            $fileName = basename($_FILES[$fn]['name']);
+            $targetPath = $uploadDir . $fileName;
+            if (move_uploaded_file($_FILES[$fn]['tmp_name'], $targetPath)) {
+                $imageData[$pair['file']] = $fileName;
+                $imageData[$pair['path']] = 'wwwroot/images/' . $fileName;
+            } else {
+                http_response_code(500);
+                die('Error uploading file');
+            }
+        } else {
+            $imageData[$pair['file']] = null;
+            $imageData[$pair['path']] = null;
+        }
+    }
+
+    $data = array_merge([
+        'name' => $_POST['name'] ?? null,
+        'date' => $_POST['date'] ?? null,
+        'address' => $_POST['address'] ?? null,
+        'phone' => $_POST['phone'] ?? null,
+        'email' => $_POST['email'] ?? null,
+        'active' => $_POST['active'] == 'true' ? 1 : 0 ?? null,      
+        'city' => $_POST['city'] ?? null,
+        'state' => $_POST['state'] ?? null,
         'description' => $_POST['description'] ?? null,
-        'content' => $_POST['content'] ?? null,
         'video' => $_POST['video'] ?? null,
-        'image_file' => $image_file,
-        'image_path' => $image_path,
         'created_user_id' => $_POST['created_user_id'] ?? null,
         'created_date' => $_POST['created_date'] ?? null,
         'updated_user_id' => $_POST['updated_user_id'] ?? null,
-        'updated_date' => $_POST['updated_date'] ?? null
-    ];
+        'updated_date' => $_POST['updated_date'] ?? null,
+    ], $imageData);
 
-    if ($aboutUs->existsByTitle($data['title'])) {
+    if (!empty($data['email']) && $client->existsByEmail($data['email'])) {
         echo json_encode([
             "message" => "record_already_exists"
         ]);
         exit;
     }
 
-    if ($aboutUs->create($data)) {
-        echo json_encode(['about_us' => []]);
+    if ($client->create($data)) {
+        echo json_encode(['client' => []]);
     } else {
         echo json_encode(array("message" => "error_creating_record"));
     }

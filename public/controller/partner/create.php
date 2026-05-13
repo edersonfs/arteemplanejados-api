@@ -34,7 +34,7 @@ $authorization = $_SERVER['HTTP_AUTHORIZATION'];
 $token = str_replace('Bearer ', '', $authorization);
 
 include_once '../../../app/database/Connection.php';
-include_once '../../model/about_us.php';
+include_once '../../model/partner.php';
 
 $conn = new Connection();
 $db = $conn->connect();
@@ -42,7 +42,7 @@ $db = $conn->connect();
 try {
     $decoded = JWT::decode($token, new Key($_SERVER['KEY'], 'HS256'));
 
-    $aboutUs = new AboutUs($db);
+    $partner = new Partner($db);
 
     if (isset($_FILES['image_file']) && $_FILES['image_file']['error'] === UPLOAD_ERR_OK) {
         $uploadDir = dirname(__FILE__, 3) . '/wwwroot/images/';
@@ -67,11 +67,7 @@ try {
     }
 
     $data = [
-        'title' => $_POST['title'] ?? null,
-        'little_description' => $_POST['little_description'] ?? null,
-        'description' => $_POST['description'] ?? null,
-        'content' => $_POST['content'] ?? null,
-        'video' => $_POST['video'] ?? null,
+        'name' => $_POST['name'] ?? null,
         'image_file' => $image_file,
         'image_path' => $image_path,
         'created_user_id' => $_POST['created_user_id'] ?? null,
@@ -80,15 +76,15 @@ try {
         'updated_date' => $_POST['updated_date'] ?? null
     ];
 
-    if ($aboutUs->existsByTitle($data['title'])) {
+    if ($partner->existsByName($data['name'])) {
         echo json_encode([
             "message" => "record_already_exists"
         ]);
         exit;
     }
 
-    if ($aboutUs->create($data)) {
-        echo json_encode(['about_us' => []]);
+    if ($partner->create($data)) {
+        echo json_encode(['partner' => []]);
     } else {
         echo json_encode(array("message" => "error_creating_record"));
     }

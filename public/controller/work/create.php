@@ -14,7 +14,7 @@ if (isset($_SERVER['HTTP_ORIGIN'])) {
 
 if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
     if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_METHOD']))
-        header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
+        header("Access-Control-Allow-Methods: GET, POST, OPTIONS");         
 
     if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']))
         header("Access-Control-Allow-Headers: {$_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']}");
@@ -34,26 +34,26 @@ $authorization = $_SERVER['HTTP_AUTHORIZATION'];
 $token = str_replace('Bearer ', '', $authorization);
 
 include_once '../../../app/database/Connection.php';
-include_once '../../model/about_us.php';
-
+include_once '../../model/work.php';
+ 
 $conn = new Connection();
 $db = $conn->connect();
 
-try {
+try {        
     $decoded = JWT::decode($token, new Key($_SERVER['KEY'], 'HS256'));
 
-    $aboutUs = new AboutUs($db);
-
+    $work = new Work($db); 
+    
     if (isset($_FILES['image_file']) && $_FILES['image_file']['error'] === UPLOAD_ERR_OK) {
         $uploadDir = dirname(__FILE__, 3) . '/wwwroot/images/';
-
+        
         if (!file_exists($uploadDir)) {
             mkdir($uploadDir, 0777, true);
         }
 
         $fileName = basename($_FILES['image_file']['name']);
         $targetPath = $uploadDir . $fileName;
-
+        
         if (move_uploaded_file($_FILES['image_file']['tmp_name'], $targetPath)) {
             $image_file = $fileName;
             $image_path = 'wwwroot/images/' . $fileName;
@@ -67,11 +67,9 @@ try {
     }
 
     $data = [
-        'title' => $_POST['title'] ?? null,
-        'little_description' => $_POST['little_description'] ?? null,
-        'description' => $_POST['description'] ?? null,
-        'content' => $_POST['content'] ?? null,
-        'video' => $_POST['video'] ?? null,
+        'type' => $_POST['type'] ?? null,
+        'neighborhood' => $_POST['neighborhood'] ?? null,
+        'city' => $_POST['city'] ?? null,
         'image_file' => $image_file,
         'image_path' => $image_path,
         'created_user_id' => $_POST['created_user_id'] ?? null,
@@ -80,18 +78,18 @@ try {
         'updated_date' => $_POST['updated_date'] ?? null
     ];
 
-    if ($aboutUs->existsByTitle($data['title'])) {
+    if ($work->existsByTypeNeighborhoodCity($data['type'], $data['neighborhood'], $data['city'])) {
         echo json_encode([
-            "message" => "record_already_exists"
-        ]);
-        exit;
+          "message" => "record_already_exists"
+      ]);
+      exit;
     }
 
-    if ($aboutUs->create($data)) {
-        echo json_encode(['about_us' => []]);
+    if ($work->create($data)) {
+        echo json_encode(['work' => []]);
     } else {
         echo json_encode(array("message" => "error_creating_record"));
-    }
+    }    
 } catch (Throwable $e) {
     http_response_code(401);
     die('EXPIRED' . $e);

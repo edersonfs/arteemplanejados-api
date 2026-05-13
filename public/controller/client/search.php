@@ -34,35 +34,29 @@ $authorization = $_SERVER['HTTP_AUTHORIZATION'];
 $token = str_replace('Bearer ', '', $authorization);
 
 include_once '../../../app/database/Connection.php';
-include_once '../../model/about_us.php';
-include_once '../../utils/utils.php';
+include_once '../../model/client.php';
 
 $conn = new Connection();
 $db = $conn->connect();
 
 try {
-    $aboutUs = new AboutUs($db);
-    $utils = new Utils();
+    $decoded = JWT::decode($token, new Key($_SERVER['KEY'], 'HS256'));
+
+    $client = new Client($db);
+
+    $search = filter_input(INPUT_GET, 'search', FILTER_DEFAULT);
+    $search = "%$search%";
 
     $page = isset($_GET['page']) ? intval($_GET['page']) : 1;
     $limit = isset($_GET['limit']) ? intval($_GET['limit']) : 9999;
     $offset = ($page - 1) * $limit;
 
-    $stmt = $aboutUs->getAll();
-    $stmt_pag = $aboutUs->getPagination($limit, $offset);
-    $total = is_array($stmt) ? count($stmt) : $stmt->rowCount();
+    $stmt_pag = $client->search($search, $limit, $offset);
+    $total = is_array($stmt_pag) ? count($stmt_pag) : $stmt_pag->rowCount();
 
-    if (is_array($stmt)) {
-        $num = count($stmt);
-    } else {
-        $num = $stmt->rowCount();
-    }
-
-    $stmt = $utils->utf8ize($stmt);
-
-    if ($num > 0) {
+    if ($total > 0) {
         echo json_encode([
-            'about_us' => $stmt_pag,
+            'client' => $stmt_pag,
             "total" => $total,
             "page" => $page,
             "totalPages" => ceil($total / $limit),
