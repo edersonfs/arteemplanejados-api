@@ -6,17 +6,15 @@ use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 use app\database\Connection;
 
-// start cors
 if (isset($_SERVER['HTTP_ORIGIN'])) {
     header("Access-Control-Allow-Origin: {$_SERVER['HTTP_ORIGIN']}");
     header('Access-Control-Allow-Credentials: true');
-    header('Access-Control-Max-Age: 86400');    // cache for 1 day
+    header('Access-Control-Max-Age: 86400');
 }
 
-// Access-Control headers are received during OPTIONS requests
 if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
     if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_METHOD']))
-        header("Access-Control-Allow-Methods: GET, POST, OPTIONS, DELETE");         
+        header("Access-Control-Allow-Methods: GET, POST, OPTIONS, DELETE");
 
     if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']))
         header("Access-Control-Allow-Headers: {$_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']}");
@@ -24,7 +22,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
     exit(0);
 }
 
-// required headers
 header("Access-Control-Allow-Origin: *");
 header('Access-Control-Allow-Credentials: true');
 header("Access-Control-Allow-Methods: HEAD, GET, POST, PUT, PATCH, DELETE, OPTIONS");
@@ -36,29 +33,28 @@ $dotenv->load();
 $authorization = $_SERVER['HTTP_AUTHORIZATION'];
 $token = str_replace('Bearer ', '', $authorization);
 
-// include database and object files
 include_once '../../../app/database/Connection.php';
 include_once '../../model/about_us.php';
- 
-// instantiate database and object
+
 $conn = new Connection();
 $db = $conn->connect();
 
-try {        
+try {
     $decoded = JWT::decode($token, new Key($_SERVER['KEY'], 'HS256'));
 
-    // initialize object
-    $aboutUs = new AboutUs($db);    
+    $aboutUs = new AboutUs($db);
 
-    $id = filter_input(INPUT_GET, 'id', FILTER_DEFAULT);    
-    
-    // Set the ID property
+    $id = filter_input(INPUT_GET, 'id', FILTER_DEFAULT);
+
+    if (!$id) {
+        echo json_encode(array("message" => "missing_data_id"));
+        exit;
+    }
+
     $aboutUs->id = $id;
-    
-    // Check if record exists
-    if($aboutUs->getById($id)) {
-        // Delete the record
-        if($aboutUs->delete($id)) {
+
+    if ($aboutUs->getById($id)) {
+        if ($aboutUs->delete($id)) {
             echo json_encode(array("message" => "success"));
         } else {
             echo json_encode(array("message" => "error"));
@@ -69,5 +65,5 @@ try {
 } catch (Throwable $e) {
     http_response_code(401);
     die('EXPIRED');
-} 
-?> 
+}
+?>

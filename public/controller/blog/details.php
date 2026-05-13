@@ -34,23 +34,20 @@ $authorization = $_SERVER['HTTP_AUTHORIZATION'];
 $token = str_replace('Bearer ', '', $authorization);
 
 include_once '../../../app/database/Connection.php';
-include_once '../../model/about_us.php';
+include_once '../../model/blog.php';
 include_once '../../utils/utils.php';
 
 $conn = new Connection();
 $db = $conn->connect();
 
 try {
-    $aboutUs = new AboutUs($db);
+    $blog = new Blog($db);
     $utils = new Utils();
 
-    $page = isset($_GET['page']) ? intval($_GET['page']) : 1;
-    $limit = isset($_GET['limit']) ? intval($_GET['limit']) : 9999;
-    $offset = ($page - 1) * $limit;
+    $id = filter_input(INPUT_GET, 'id', FILTER_DEFAULT);
+    $id = "$id";
 
-    $stmt = $aboutUs->getAll();
-    $stmt_pag = $aboutUs->getPagination($limit, $offset);
-    $total = is_array($stmt) ? count($stmt) : $stmt->rowCount();
+    $stmt = $blog->getById($id);
 
     if (is_array($stmt)) {
         $num = count($stmt);
@@ -61,13 +58,7 @@ try {
     $stmt = $utils->utf8ize($stmt);
 
     if ($num > 0) {
-        echo json_encode([
-            'about_us' => $stmt_pag,
-            "total" => $total,
-            "page" => $page,
-            "totalPages" => ceil($total / $limit),
-            "limit" => $limit
-        ]);
+        echo json_encode(['blog' => [$stmt]]);
     } else {
         echo json_encode(
             array("message" => "record_does_not_exist")

@@ -6,17 +6,15 @@ use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 use app\database\Connection;
 
-// start cors
 if (isset($_SERVER['HTTP_ORIGIN'])) {
     header("Access-Control-Allow-Origin: {$_SERVER['HTTP_ORIGIN']}");
     header('Access-Control-Allow-Credentials: true');
-    header('Access-Control-Max-Age: 86400');    // cache for 1 day
+    header('Access-Control-Max-Age: 86400');
 }
 
-// Access-Control headers are received during OPTIONS requests
 if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
     if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_METHOD']))
-        header("Access-Control-Allow-Methods: GET, POST, OPTIONS");         
+        header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
 
     if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']))
         header("Access-Control-Allow-Headers: {$_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']}");
@@ -24,7 +22,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
     exit(0);
 }
 
-// required headers
 header("Access-Control-Allow-Origin: *");
 header('Access-Control-Allow-Credentials: true');
 header("Access-Control-Allow-Methods: HEAD, GET, POST, PUT, PATCH, DELETE, OPTIONS");
@@ -36,46 +33,42 @@ $dotenv->load();
 $authorization = $_SERVER['HTTP_AUTHORIZATION'];
 $token = str_replace('Bearer ', '', $authorization);
 
-// include database and object files
 include_once '../../../app/database/Connection.php';
 include_once '../../model/about_us.php';
-include_once '../../utils/utils.php';
- 
-// instantiate database and object
+
 $conn = new Connection();
 $db = $conn->connect();
 
-try {        
+try {
     $decoded = JWT::decode($token, new Key($_SERVER['KEY'], 'HS256'));
 
-    // initialize object
-    $aboutUs = new AboutUs($db);  
-    $utils = new Utils();  
+    $aboutUs = new AboutUs($db);
 
-    // parameters
     $search = filter_input(INPUT_GET, 'search', FILTER_DEFAULT);
-    $search = "%$search%"; // Add wildcards for LIKE search
+    $search = "%$search%";
 
-    $stmt = $aboutUs->search($search);
+    $page = isset($_GET['page']) ? intval($_GET['page']) : 1;
+    $limit = isset($_GET['limit']) ? intval($_GET['limit']) : 9999;
+    $offset = ($page - 1) * $limit;
 
-    if (is_array($stmt)) {
-        $num = count($stmt);
-    } else {
-        $num = 0;
-    }
+    $stmt_pag = $aboutUs->search($search, $limit, $offset);
+    $total = is_array($stmt_pag) ? count($stmt_pag) : $stmt_pag->rowCount();
 
-    $stmt = $utils->utf8ize($stmt);
-    
-    // check if more than 0 record found
-    if($num > 0) {
-        echo json_encode(['about_us' => [$stmt]]);
+    if ($total > 0) {
+        echo json_encode([
+            'about_us' => $stmt_pag,
+            "total" => $total,
+            "page" => $page,
+            "totalPages" => ceil($total / $limit),
+            "limit" => $limit
+        ]);
     } else {
         echo json_encode(
-            array("message" => "record_does_not_found")
+            array("message" => "record_does_not_exist")
         );
-    }    
+    }
 } catch (Throwable $e) {
     http_response_code(401);
-    die('EXPIRED');
+    die('EXPIRED' . $e);
 }
-?> 
+?>

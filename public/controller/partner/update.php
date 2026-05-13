@@ -14,7 +14,7 @@ if (isset($_SERVER['HTTP_ORIGIN'])) {
 
 if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
     if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_METHOD']))
-        header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
+        header("Access-Control-Allow-Methods: GET, POST, PUT, OPTIONS");
 
     if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']))
         header("Access-Control-Allow-Headers: {$_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']}");
@@ -34,7 +34,7 @@ $authorization = $_SERVER['HTTP_AUTHORIZATION'];
 $token = str_replace('Bearer ', '', $authorization);
 
 include_once '../../../app/database/Connection.php';
-include_once '../../model/about_us.php';
+include_once '../../model/partner.php';
 
 $conn = new Connection();
 $db = $conn->connect();
@@ -42,7 +42,16 @@ $db = $conn->connect();
 try {
     $decoded = JWT::decode($token, new Key($_SERVER['KEY'], 'HS256'));
 
-    $aboutUs = new AboutUs($db);
+    $partner = new Partner($db);
+
+    $oldPartner = $partner->getById($_POST['id']);
+    if (!$oldPartner) {
+        echo json_encode(array("message" => "record_does_not_exist"));
+        exit;
+    }
+
+    $image_file = $oldPartner['image_file'];
+    $image_path = $oldPartner['image_path'];
 
     if (isset($_FILES['image_file']) && $_FILES['image_file']['error'] === UPLOAD_ERR_OK) {
         $uploadDir = dirname(__FILE__, 3) . '/wwwroot/images/';
@@ -61,36 +70,28 @@ try {
             http_response_code(500);
             die('Error uploading file');
         }
-    } else {
-        $image_file = null;
-        $image_path = null;
     }
 
     $data = [
-        'title' => $_POST['title'] ?? null,
-        'little_description' => $_POST['little_description'] ?? null,
-        'description' => $_POST['description'] ?? null,
-        'content' => $_POST['content'] ?? null,
-        'video' => $_POST['video'] ?? null,
+        'id' => $_POST['id'] ?? null,
+        'name' => $_POST['name'] ?? null,
         'image_file' => $image_file,
         'image_path' => $image_path,
-        'created_user_id' => $_POST['created_user_id'] ?? null,
-        'created_date' => $_POST['created_date'] ?? null,
         'updated_user_id' => $_POST['updated_user_id'] ?? null,
-        'updated_date' => $_POST['updated_date'] ?? null
+        'updated_date' => date('Y-m-d H:i:s')
     ];
 
-    if ($aboutUs->existsByTitle($data['title'])) {
+    if ($partner->existsByNameWhenEdit($data['name'], $data['id'])) {
         echo json_encode([
             "message" => "record_already_exists"
         ]);
         exit;
     }
 
-    if ($aboutUs->create($data)) {
-        echo json_encode(['about_us' => []]);
+    if ($partner->update($data)) {
+        echo json_encode(['partner' => []]);
     } else {
-        echo json_encode(array("message" => "error_creating_record"));
+        echo json_encode(array("message" => "error_updating_record"));
     }
 } catch (Throwable $e) {
     http_response_code(401);

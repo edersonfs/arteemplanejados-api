@@ -34,22 +34,22 @@ $authorization = $_SERVER['HTTP_AUTHORIZATION'];
 $token = str_replace('Bearer ', '', $authorization);
 
 include_once '../../../app/database/Connection.php';
-include_once '../../model/about_us.php';
+include_once '../../model/partner.php';
 include_once '../../utils/utils.php';
 
 $conn = new Connection();
 $db = $conn->connect();
 
 try {
-    $aboutUs = new AboutUs($db);
+    $partner = new Partner($db);
     $utils = new Utils();
 
     $page = isset($_GET['page']) ? intval($_GET['page']) : 1;
     $limit = isset($_GET['limit']) ? intval($_GET['limit']) : 9999;
     $offset = ($page - 1) * $limit;
 
-    $stmt = $aboutUs->getAll();
-    $stmt_pag = $aboutUs->getPagination($limit, $offset);
+    $stmt = $partner->getAll();
+    $stmt_pag = $partner->getPagination($limit, $offset);
     $total = is_array($stmt) ? count($stmt) : $stmt->rowCount();
 
     if (is_array($stmt)) {
@@ -62,7 +62,7 @@ try {
 
     if ($num > 0) {
         echo json_encode([
-            'about_us' => $stmt_pag,
+            'partner' => $stmt_pag,
             "total" => $total,
             "page" => $page,
             "totalPages" => ceil($total / $limit),
