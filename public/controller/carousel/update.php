@@ -74,7 +74,8 @@ try {
         }
 
         // Get file information
-        $fileName = basename($_FILES['image_file']['name']);
+        $extension = pathinfo($_FILES['image_file']['name'], PATHINFO_EXTENSION);
+        $fileName = uniqid('img_', true) . '.' . $extension;
         $targetPath = $uploadDir . $fileName;
         
         // Move uploaded file to target directory
@@ -98,7 +99,8 @@ try {
             mkdir($uploadDir, 0777, true);
         }
 
-        $fileName02 = basename($_FILES['image_file_02']['name']);
+        $extension = pathinfo($_FILES['image_file_02']['name'], PATHINFO_EXTENSION);
+        $fileName02 = uniqid('img_', true) . '.' . $extension;
         $targetPath02 = $uploadDir . $fileName02;    
         
         if (move_uploaded_file($_FILES['image_file_02']['tmp_name'], $targetPath02)) {

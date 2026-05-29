@@ -46,7 +46,7 @@ $conn = new Connection();
 $db = $conn->connect();
 
 try {
-    $decoded = JWT::decode($token, new Key($_SERVER['KEY'], 'HS256'));
+    $decoded = JWT::decode($token, new Key($_SERVER['KEY'], 'HS256'));    
 
     // initialize object
     $group = new Group($db);    

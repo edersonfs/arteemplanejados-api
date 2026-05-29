@@ -11,6 +11,6 @@ class Utils {
         $mixed = mb_convert_encoding($mixed, 'UTF-8', 'UTF-8');
     }
     return $mixed;
-}
+  }
 }
 ?> 

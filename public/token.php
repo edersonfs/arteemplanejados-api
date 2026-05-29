@@ -33,7 +33,9 @@ if(!password_verify($password, $userFound->password)) {
 $payload = [
   "exp" => time() + 12000,
   "iat" => time(),
-  "email" => $email
+  "email" => $email,
+  "group_id" => isset($userFound->group_id) ? (int) $userFound->group_id : null,
+  "company_id" => isset($userFound->company_id) ? (int) $userFound->company_id : null,
 ];
 
 $encode = JWT::encode($payload, $_ENV['KEY'], 'HS256');

@@ -71,7 +71,8 @@ try {
             mkdir($uploadDir, 0777, true);
         }
 
-        $fileName = basename($_FILES['image_file']['name']) . '_' . date('Ymd_His');
+        $extension = pathinfo($_FILES['image_file']['name'], PATHINFO_EXTENSION);
+        $fileName = uniqid('img_', true) . '.' . $extension;
         $targetPath = $uploadDir . $fileName;    
         
         if (move_uploaded_file($_FILES['image_file']['tmp_name'], $targetPath)) {

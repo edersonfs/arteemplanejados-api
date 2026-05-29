@@ -48,10 +48,19 @@ $db = $conn->connect();
 try {
     $decoded = JWT::decode($token, new Key($_SERVER['KEY'], 'HS256'));
 
+    $group_id = isset($decoded->group_id) ? (int) $decoded->group_id : null;    
+
+    if ($group_id != 1) {
+      echo json_encode([
+          "message" => "permission_denied"
+      ]);
+      exit;
+    }
+
     // initialize object
     $group = new Group($db);    
 
-    $id = filter_input(INPUT_GET, 'id', FILTER_DEFAULT);
+    $id = filter_input(INPUT_GET, 'id', FILTER_DEFAULT);    
 
     if (!$id) {
         echo json_encode(array("message" => "missing_data_id"));

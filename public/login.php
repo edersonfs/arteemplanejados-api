@@ -34,16 +34,16 @@ try {
     $email = filter_input(INPUT_POST, 'email', FILTER_SANITIZE_EMAIL);
         
     $stmt =  $db->prepare("SELECT * FROM user where email = :email");
-    $stmt->execute([
+    $stmt -> execute([
       'email' => $email
     ]);    
-    $num = $stmt->rowCount();
+    $num = $stmt -> rowCount();
     
     // check if more than 0 record found
-    if($num>0){
+    if ($num > 0) {
     
-        $users_arr=array();
-        $users_arr["login"]=array();
+        $users_arr = array();
+        $users_arr["login"] = array();
     
         // retrieve our table contents
         // fetch() is faster than fetchAll()
@@ -53,11 +53,12 @@ try {
             // just $name only
             extract($row);
     
-            $user_item=array(
+            $user_item = array(
                 "id" => $id,
                 "name" => $name,
                 "email" => $email,
-                "group_id" => $group_id
+                "group_id" => $group_id,
+                "company_id" => $company_id
             );
     
             array_push($users_arr["login"], $user_item);

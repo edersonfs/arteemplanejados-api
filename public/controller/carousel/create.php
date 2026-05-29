@@ -60,7 +60,8 @@ try {
         }
 
         // Get file information
-        $fileName = basename($_FILES['image_file']['name']);
+        $extension = pathinfo($_FILES['image_file']['name'], PATHINFO_EXTENSION);
+        $fileName = uniqid('img_', true) . '.' . $extension;
         $targetPath = $uploadDir . $fileName;
         
         // Move uploaded file to target directory
@@ -86,13 +87,14 @@ try {
         }
 
         // Get file information
-        $fileName = basename($_FILES['image_file_02']['name']);
-        $targetPath = $uploadDir . $fileName;
+        $extension = pathinfo($_FILES['image_file_02']['name'], PATHINFO_EXTENSION);
+        $fileName02 = uniqid('img_', true) . '.' . $extension;
+        $targetPath02 = $uploadDir . $fileName02;
         
         // Move uploaded file to target directory
-        if (move_uploaded_file($_FILES['image_file_02']['tmp_name'], $targetPath)) {
-            $image_file_02 = $fileName;
-            $image_path_02 = 'wwwroot/images/' . $fileName;
+        if (move_uploaded_file($_FILES['image_file_02']['tmp_name'], $targetPath02)) {
+            $image_file_02 = $fileName02;
+            $image_path_02 = 'wwwroot/images/' . $fileName02;
         } else {
             http_response_code(500);
             die('Error uploading file');
