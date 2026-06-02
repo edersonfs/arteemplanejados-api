@@ -74,7 +74,7 @@ class Group {
     
     // GET
 
-    public function getAll() {
+    public function getAll($group_id) {
         $query = "
             SELECT 
                 gr.id as id,
@@ -86,10 +86,11 @@ class Group {
                 `" . $this->table_name . "` gr 
                 inner join `user` upus on gr.updated_user_id = upus.id 
                 inner join `user` crus on gr.created_user_id = crus.id
+            WHERE (gr.id <> 1 or :group_id = 1)
             ORDER BY gr.name";
 
         $stmt = $this->conn->prepare($query);
-        $stmt->execute();
+        $stmt->execute(['group_id' => $group_id]);
         
         $items = [];
 
@@ -100,7 +101,7 @@ class Group {
         return $items;
     }
 
-    public function getPagination($limit, $offset) {
+    public function getPagination($limit, $offset, $group_id) {
         $query = "
              SELECT 
                 gr.id as id,
@@ -112,11 +113,12 @@ class Group {
                 `" . $this->table_name . "` gr 
                 inner join `user` upus on gr.updated_user_id = upus.id 
                 inner join `user` crus on gr.created_user_id = crus.id
+            WHERE (gr.id <> 1 or :group_id = 1)
             ORDER BY gr.name
             LIMIT $limit OFFSET $offset";
 
         $stmt = $this->conn->prepare($query);
-        $stmt->execute();
+        $stmt->execute(['group_id' => $group_id]);
         
         $items = [];
 
@@ -150,7 +152,7 @@ class Group {
         return $stmt->fetch(PDO::FETCH_ASSOC);
     } 
 
-    public function search($search, $limit, $offset) {
+    public function search($search, $limit, $offset, $group_id) {
         $query = "
             SELECT 
                 gr.id as id,
@@ -163,12 +165,12 @@ class Group {
                 inner join `user` upus on gr.updated_user_id = upus.id 
                 inner join `user` crus on gr.created_user_id = crus.id
             WHERE 
-                LOWER(gr.name) LIKE LOWER('%$search%')
+                LOWER(gr.name) LIKE LOWER('%$search%') and (gr.id <> 1 or :group_id = 1)
             ORDER BY gr.name
             LIMIT $limit OFFSET $offset";    
 
             $stmt = $this->conn->prepare($query);
-            $stmt->execute();
+            $stmt->execute(['group_id' => $group_id]);
             
             $items = [];
     

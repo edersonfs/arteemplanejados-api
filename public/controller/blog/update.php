@@ -57,9 +57,13 @@ try {
 
     $image_file = $oldBlog['image_file'];
     $image_path = $oldBlog['image_path'];
-    if (isset($_FILES['image_file']) && $_FILES['image_file']['error'] === UPLOAD_ERR_OK) {
-        $fileName = basename($_FILES['image_file']['name']);
-        if (move_uploaded_file($_FILES['image_file']['tmp_name'], $uploadDir . $fileName)) {
+
+    if (isset($_FILES['image_file']) && $_FILES['image_file']['error'] === UPLOAD_ERR_OK) {        
+        $extension = pathinfo($_FILES['image_file']['name'], PATHINFO_EXTENSION);
+        $fileName = uniqid('img_', true) . '.' . $extension;
+        $targetPath = $uploadDir . $fileName;
+
+        if (move_uploaded_file($_FILES['image_file']['tmp_name'], $targetPath)) {
             $image_file = $fileName;
             $image_path = 'wwwroot/images/' . $fileName;
         } else {
@@ -70,9 +74,13 @@ try {
 
     $image_file_02 = $oldBlog['image_file_02'];
     $image_path_02 = $oldBlog['image_path_02'];
-    if (isset($_FILES['image_file_02']) && $_FILES['image_file_02']['error'] === UPLOAD_ERR_OK) {
-        $fileName02 = basename($_FILES['image_file_02']['name']);
-        if (move_uploaded_file($_FILES['image_file_02']['tmp_name'], $uploadDir . $fileName02)) {
+
+    if (isset($_FILES['image_file_02']) && $_FILES['image_file_02']['error'] === UPLOAD_ERR_OK) {        
+        $extension = pathinfo($_FILES['image_file_02']['name'], PATHINFO_EXTENSION);
+        $fileName02 = uniqid('img_', true) . '.' . $extension;
+        $targetPath02 = $uploadDir . $fileName02;
+
+        if (move_uploaded_file($_FILES['image_file_02']['tmp_name'], $targetPath02)) {
             $image_file_02 = $fileName02;
             $image_path_02 = 'wwwroot/images/' . $fileName02;
         } else {
@@ -83,9 +91,13 @@ try {
 
     $image_file_03 = $oldBlog['image_file_03'];
     $image_path_03 = $oldBlog['image_path_03'];
-    if (isset($_FILES['image_file_03']) && $_FILES['image_file_03']['error'] === UPLOAD_ERR_OK) {
-        $fileName03 = basename($_FILES['image_file_03']['name']);
-        if (move_uploaded_file($_FILES['image_file_03']['tmp_name'], $uploadDir . $fileName03)) {
+
+    if (isset($_FILES['image_file_03']) && $_FILES['image_file_03']['error'] === UPLOAD_ERR_OK) {        
+        $extension = pathinfo($_FILES['image_file_03']['name'], PATHINFO_EXTENSION);
+        $fileName03 = uniqid('img_', true) . '.' . $extension;
+        $targetPath03 = $uploadDir . $fileName03;
+        
+        if (move_uploaded_file($_FILES['image_file_03']['tmp_name'], $targetPath03)) {
             $image_file_03 = $fileName03;
             $image_path_03 = 'wwwroot/images/' . $fileName03;
         } else {
@@ -96,9 +108,13 @@ try {
 
     $image_file_04 = $oldBlog['image_file_04'];
     $image_path_04 = $oldBlog['image_path_04'];
-    if (isset($_FILES['image_file_04']) && $_FILES['image_file_04']['error'] === UPLOAD_ERR_OK) {
-        $fileName04 = basename($_FILES['image_file_04']['name']);
-        if (move_uploaded_file($_FILES['image_file_04']['tmp_name'], $uploadDir . $fileName04)) {
+
+    if (isset($_FILES['image_file_04']) && $_FILES['image_file_04']['error'] === UPLOAD_ERR_OK) {        
+        $extension = pathinfo($_FILES['image_file_04']['name'], PATHINFO_EXTENSION);
+        $fileName04 = uniqid('img_', true) . '.' . $extension;
+        $targetPath04 = $uploadDir . $fileName04;
+        
+        if (move_uploaded_file($_FILES['image_file_04']['tmp_name'], $targetPath04)) {
             $image_file_04 = $fileName04;
             $image_path_04 = 'wwwroot/images/' . $fileName04;
         } else {

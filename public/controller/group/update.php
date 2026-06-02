@@ -52,12 +52,21 @@ $db = $conn->connect();
 try {
     $decoded = JWT::decode($token, new Key($_SERVER['KEY'], 'HS256'));
 
+    $group_id = isset($decoded->group_id) ? (int) $decoded->group_id : null;    
+
+    if ($group_id != 1) {
+      echo json_encode([
+          "message" => "permission_denied"
+      ]);
+      exit;
+    }
+
     // initialize object
     $group = new Group($db);
 
     // Get ID parameter from PUT data
     $putData = file_get_contents("php://input");
-    $data = json_decode($putData, true);
+    $data = json_decode($putData, true);  
 
     $id = $data['id'] ?? null;
     

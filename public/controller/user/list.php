@@ -48,6 +48,9 @@ $db = $conn->connect();
 try {        
     $decoded = JWT::decode($token, new Key($_SERVER['KEY'], 'HS256'));
 
+    $group_id = isset($decoded->group_id) ? (int) $decoded->group_id : null;
+    $company_id = isset($decoded->company_id) ? (int) $decoded->company_id : null;
+
     // initialize object
     $user = new User($db); 
     $utils = new Utils(); 
@@ -56,8 +59,8 @@ try {
     $limit = isset($_GET['limit']) ? intval($_GET['limit']) : 9999;
     $offset = ($page - 1) * $limit;
 
-    $stmt = $user->getAll();
-    $stmt_pag = $user->getPagination($limit, $offset);
+    $stmt = $user->getAll($company_id, $group_id);
+    $stmt_pag = $user->getPagination($limit, $offset, $company_id, $group_id);
     $total = is_array($stmt) ? count($stmt) : $stmt->rowCount();
 
     if (is_array($stmt)) {
@@ -84,7 +87,7 @@ try {
     }   
 } catch (Throwable $e) {
   http_response_code(401);
-  die('EXPIRED');
+  die('EXPIRED' . $e);
 }
 
 ?>

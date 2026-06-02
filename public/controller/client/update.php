@@ -61,8 +61,10 @@ try {
         $imageData[$pair['file']] = $oldClient[$pair['file']];
         $imageData[$pair['path']] = $oldClient[$pair['path']];
         if (isset($_FILES[$fn]) && $_FILES[$fn]['error'] === UPLOAD_ERR_OK) {
-            $fileName = basename($_FILES[$fn]['name']);
+            $extension = pathinfo($_FILES[$fn]['name'], PATHINFO_EXTENSION);
+            $fileName = uniqid('img_', true) . '.' . $extension;
             $targetPath = $uploadDir . $fileName;
+            
             if (move_uploaded_file($_FILES[$fn]['tmp_name'], $targetPath)) {
                 $imageData[$pair['file']] = $fileName;
                 $imageData[$pair['path']] = 'wwwroot/images/' . $fileName;

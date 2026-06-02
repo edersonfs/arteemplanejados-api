@@ -60,8 +60,10 @@ try {
             mkdir($uploadDir, 0777, true);
         }
 
-        $fileName = basename($_FILES['image_file']['name']);
-        $targetPath = $uploadDir . $fileName;
+        // Get file information
+        $extension = pathinfo($_FILES['image_file']['name'], PATHINFO_EXTENSION);
+        $fileName = uniqid('img_', true) . '.' . $extension;
+        $targetPath = $uploadDir . $fileName;        
 
         if (move_uploaded_file($_FILES['image_file']['tmp_name'], $targetPath)) {
             $image_file = $fileName;
