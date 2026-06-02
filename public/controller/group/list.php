@@ -8,20 +8,20 @@ use app\database\Connection;
 
 // start cors
 if (isset($_SERVER['HTTP_ORIGIN'])) {
-    header("Access-Control-Allow-Origin: {$_SERVER['HTTP_ORIGIN']}");
-    header('Access-Control-Allow-Credentials: true');
-    header('Access-Control-Max-Age: 86400');    // cache for 1 day
+  header("Access-Control-Allow-Origin: {$_SERVER['HTTP_ORIGIN']}");
+  header('Access-Control-Allow-Credentials: true');
+  header('Access-Control-Max-Age: 86400');    // cache for 1 day
 }
 
 // Access-Control headers are received during OPTIONS requests
 if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
-    if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_METHOD']))
-        header("Access-Control-Allow-Methods: GET, POST, OPTIONS");         
+  if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_METHOD']))
+    header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
 
-    if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']))
-        header("Access-Control-Allow-Headers: {$_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']}");
+  if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']))
+    header("Access-Control-Allow-Headers: {$_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']}");
 
-    exit(0);
+  exit(0);
 }
 
 // required headers
@@ -46,46 +46,45 @@ $conn = new Connection();
 $db = $conn->connect();
 
 try {
-    $decoded = JWT::decode($token, new Key($_SERVER['KEY'], 'HS256'));
+  $decoded = JWT::decode($token, new Key($_SERVER['KEY'], 'HS256'));
 
-    $group_id = isset($decoded->group_id) ? (int) $decoded->group_id : null;    
+  $group_id = isset($decoded->group_id) ? (int) $decoded->group_id : null;
 
-    // initialize object
-    $group = new Group($db); 
-    $utils = new Utils();
+  // initialize object
+  $group = new Group($db);
+  $utils = new Utils();
 
-    $page = isset($_GET['page']) ? intval($_GET['page']) : 1;
-    $limit = isset($_GET['limit']) ? intval($_GET['limit']) : 9999;
-    $offset = ($page - 1) * $limit;
+  $page = isset($_GET['page']) ? intval($_GET['page']) : 1;
+  $limit = isset($_GET['limit']) ? intval($_GET['limit']) : 9999;
+  $offset = ($page - 1) * $limit;
 
-    $stmt = $group->getAll($group_id);
-    $stmt_pag = $group->getPagination($limit, $offset, $group_id);
-    $total = is_array($stmt) ? count($stmt) : $stmt->rowCount();
+  $stmt = $group->getAll($group_id);
+  $stmt_pag = $group->getPagination($limit, $offset, $group_id);
+  $total = is_array($stmt) ? count($stmt) : $stmt->rowCount();
 
-    if (is_array($stmt)) {
-        $num = count($stmt);
-    } else {
-        $num = $stmt->rowCount();
-    }
+  if (is_array($stmt)) {
+    $num = count($stmt);
+  } else {
+    $num = $stmt->rowCount();
+  }
 
-    $stmt = $utils->utf8ize($stmt);
+  $stmt = $utils->utf8ize($stmt);
 
-    // check if more than 0 record found
-    if($num > 0) {    
-        echo json_encode([
-            'group' => $stmt_pag,
-            "total" => $total,
-            "page" => $page,
-            "totalPages" => ceil($total / $limit),
-            "limit" => $limit
-        ]);
-    } else {
-        echo json_encode(
-            array("message" => "record_does_not_exist")
-        );
-    }  
+  // check if more than 0 record found
+  if ($num > 0) {
+    echo json_encode([
+      'group' => $stmt_pag,
+      "total" => $total,
+      "page" => $page,
+      "totalPages" => ceil($total / $limit),
+      "limit" => $limit
+    ]);
+  } else {
+    echo json_encode(
+      array("message" => "record_does_not_exist")
+    );
+  }
 } catch (Throwable $e) {
-    http_response_code(401);
-    die('EXPIRED');
+  http_response_code(401);
+  die('EXPIRED' . $e);
 }
-?> 
