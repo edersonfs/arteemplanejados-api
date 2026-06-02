@@ -15,13 +15,13 @@ if (isset($_SERVER['HTTP_ORIGIN'])) {
 
 // Access-Control headers are received during OPTIONS requests
 if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
-    if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_METHOD']))
-        header("Access-Control-Allow-Methods: GET, POST, OPTIONS");         
+  if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_METHOD']))
+    header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
 
-    if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']))
-        header("Access-Control-Allow-Headers: {$_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']}");
+  if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']))
+    header("Access-Control-Allow-Headers: {$_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']}");
 
-    exit(0);
+  exit(0);
 }
 
 // required header
@@ -40,54 +40,53 @@ $token = str_replace('Bearer ', '', $authorization);
 include_once '../../../app/database/Connection.php';
 include_once '../../model/user.php';
 include_once '../../utils/utils.php';
- 
+
 // instantiate database and category object
 $conn = new Connection();
 $db = $conn->connect();
 
-try {        
-    $decoded = JWT::decode($token, new Key($_SERVER['KEY'], 'HS256'));
+try {
+  $decoded = JWT::decode($token, new Key($_SERVER['KEY'], 'HS256'));
 
-    $group_id = isset($decoded->group_id) ? (int) $decoded->group_id : null;
-    $company_id = isset($decoded->company_id) ? (int) $decoded->company_id : null;
+  $group_id = isset($decoded->group_id) ? (int) $decoded->group_id : null;
+  $company_id = isset($decoded->company_id) ? (int) $decoded->company_id : null;
 
-    // initialize object
-    $user = new User($db); 
-    $utils = new Utils(); 
+  // initialize object
+  $user = new User($db);
+  $utils = new Utils();
 
-    $page = isset($_GET['page']) ? intval($_GET['page']) : 1;
-    $limit = isset($_GET['limit']) ? intval($_GET['limit']) : 9999;
-    $offset = ($page - 1) * $limit;
+  $page = isset($_GET['page']) ? intval($_GET['page']) : 1;
+  $limit = isset($_GET['limit']) ? intval($_GET['limit']) : 9999;
+  $offset = ($page - 1) * $limit;
 
-    $stmt = $user->getAll($company_id, $group_id);
-    $stmt_pag = $user->getPagination($limit, $offset, $company_id, $group_id);
-    $total = is_array($stmt) ? count($stmt) : $stmt->rowCount();
+  $stmt = $user->getAll($company_id, $group_id);
+  $stmt_pag = $user->getPagination($limit, $offset, $company_id, $group_id);
+  $total = is_array($stmt) ? count($stmt) : $stmt->rowCount();
 
-    if (is_array($stmt)) {
-        $num = count($stmt);
-    } else {
-        $num = $stmt->rowCount();
-    }
+  if (is_array($stmt)) {
+    $num = count($stmt);
+  } else {
+    $num = $stmt->rowCount();
+  }
 
-    $stmt = $utils->utf8ize($stmt);
+  $stmt = $utils->utf8ize($stmt);
+  $stmt_pag = $utils->utf8ize($stmt_pag);
 
-    // check if more than 0 record found
-    if($num > 0) {    
-        echo json_encode([
-            'user' => $stmt_pag,
-            "total" => $total,
-            "page" => $page,
-            "totalPages" => ceil($total / $limit),
-            "limit" => $limit
-        ]);
-    } else {
-        echo json_encode(
-            array("message" => "record_does_not_exist")
-        );
-    }   
+  // check if more than 0 record found
+  if ($num > 0) {
+    echo json_encode([
+      'user' => $stmt_pag,
+      "total" => $total,
+      "page" => $page,
+      "totalPages" => ceil($total / $limit),
+      "limit" => $limit
+    ]);
+  } else {
+    echo json_encode(
+      array("message" => "record_does_not_exist")
+    );
+  }
 } catch (Throwable $e) {
   http_response_code(401);
-  die('EXPIRED' . $e);
+  die('EXPIRED');
 }
-
-?>

@@ -8,20 +8,20 @@ use app\database\Connection;
 
 // start cors
 if (isset($_SERVER['HTTP_ORIGIN'])) {
-    header("Access-Control-Allow-Origin: {$_SERVER['HTTP_ORIGIN']}");
-    header('Access-Control-Allow-Credentials: true');
-    header('Access-Control-Max-Age: 86400');    // cache for 1 day
+  header("Access-Control-Allow-Origin: {$_SERVER['HTTP_ORIGIN']}");
+  header('Access-Control-Allow-Credentials: true');
+  header('Access-Control-Max-Age: 86400');    // cache for 1 day
 }
 
 // Access-Control headers are received during OPTIONS requests
 if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
-    if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_METHOD']))
-        header("Access-Control-Allow-Methods: GET, POST, OPTIONS");         
+  if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_METHOD']))
+    header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
 
-    if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']))
-        header("Access-Control-Allow-Headers: {$_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']}");
+  if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']))
+    header("Access-Control-Allow-Headers: {$_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']}");
 
-    exit(0);
+  exit(0);
 }
 
 // required headers
@@ -46,48 +46,47 @@ $conn = new Connection();
 $db = $conn->connect();
 
 try {
-    $decoded = JWT::decode($token, new Key($_SERVER['KEY'], 'HS256'));
+  $decoded = JWT::decode($token, new Key($_SERVER['KEY'], 'HS256'));
 
-    // Get search term parameter
-    $searchTerm = isset($_GET['search_term']) ? $_GET['search_term'] : '';
+  // Get search term parameter
+  $searchTerm = isset($_GET['search_term']) ? $_GET['search_term'] : '';
 
-    // Initialize object
-    $carousel = new Carousel($db);
-    $utils = new Utils();
-    
-    // parameters
-    $search = filter_input(INPUT_GET, 'search', FILTER_DEFAULT);
-    $search = "%$search%"; // Add wildcards for LIKE search
+  // Initialize object
+  $carousel = new Carousel($db);
+  $utils = new Utils();
 
-    $page = isset($_GET['page']) ? intval($_GET['page']) : 1;
-    $limit = isset($_GET['limit']) ? intval($_GET['limit']) : 9999;
-    $offset = ($page - 1) * $limit;
+  // parameters
+  $search = filter_input(INPUT_GET, 'search', FILTER_DEFAULT);
+  $search = "%$search%"; // Add wildcards for LIKE search
 
-    $stmt_pag = $carousel->search($search, $limit, $offset);
-    $total = is_array($stmt_pag) ? count($stmt_pag) : $stmt_pag->rowCount();
+  $page = isset($_GET['page']) ? intval($_GET['page']) : 1;
+  $limit = isset($_GET['limit']) ? intval($_GET['limit']) : 9999;
+  $offset = ($page - 1) * $limit;
 
-    if (is_array($stmt_pag)) {
-        $num = count($stmt_pag);
-    } else {
-        $num = $stmt_pag->rowCount();
-    }
+  $stmt_pag = $carousel->search($search, $limit, $offset);
+  $total = is_array($stmt_pag) ? count($stmt_pag) : $stmt_pag->rowCount();
 
-    // check if more than 0 record found
-    if($total > 0) {
-        echo json_encode([
-            'carousel' => $stmt_pag, 
-            "total" => $total, 
-            "page" => $page, 
-            "totalPages" => ceil($total / $limit), 
-            "limit" => $limit
-        ]);
-    } else {
-        echo json_encode(
-            array("message" => "record_does_not_exist")
-        );
-    }     
+  if (is_array($stmt_pag)) {
+    $num = count($stmt_pag);
+  } else {
+    $num = $stmt_pag->rowCount();
+  }
+
+  // check if more than 0 record found
+  if ($total > 0) {
+    echo json_encode([
+      'carousel' => $stmt_pag,
+      "total" => $total,
+      "page" => $page,
+      "totalPages" => ceil($total / $limit),
+      "limit" => $limit
+    ]);
+  } else {
+    echo json_encode(
+      array("message" => "record_does_not_exist")
+    );
+  }
 } catch (Throwable $e) {
-    http_response_code(401);
-    die('EXPIRED' . $e);
+  http_response_code(401);
+  die('EXPIRED');
 }
-?> 

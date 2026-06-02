@@ -7,19 +7,19 @@ use Firebase\JWT\Key;
 use app\database\Connection;
 
 if (isset($_SERVER['HTTP_ORIGIN'])) {
-    header("Access-Control-Allow-Origin: {$_SERVER['HTTP_ORIGIN']}");
-    header('Access-Control-Allow-Credentials: true');
-    header('Access-Control-Max-Age: 86400');
+  header("Access-Control-Allow-Origin: {$_SERVER['HTTP_ORIGIN']}");
+  header('Access-Control-Allow-Credentials: true');
+  header('Access-Control-Max-Age: 86400');
 }
 
 if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
-    if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_METHOD']))
-        header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
+  if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_METHOD']))
+    header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
 
-    if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']))
-        header("Access-Control-Allow-Headers: {$_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']}");
+  if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']))
+    header("Access-Control-Allow-Headers: {$_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']}");
 
-    exit(0);
+  exit(0);
 }
 
 header("Access-Control-Allow-Origin: *");
@@ -41,31 +41,30 @@ $conn = new Connection();
 $db = $conn->connect();
 
 try {
-    $blog = new Blog($db);
-    $utils = new Utils();
+  $blog = new Blog($db);
+  $utils = new Utils();
 
-    $id = filter_input(INPUT_GET, 'id', FILTER_DEFAULT);
-    $id = "$id";
+  $id = filter_input(INPUT_GET, 'id', FILTER_DEFAULT);
+  $id = "$id";
 
-    $stmt = $blog->getById($id);
+  $stmt = $blog->getById($id);
 
-    if (is_array($stmt)) {
-        $num = count($stmt);
-    } else {
-        $num = $stmt->rowCount();
-    }
+  if (is_array($stmt)) {
+    $num = count($stmt);
+  } else {
+    $num = $stmt->rowCount();
+  }
 
-    $stmt = $utils->utf8ize($stmt);
+  $stmt = $utils->utf8ize($stmt);
 
-    if ($num > 0) {
-        echo json_encode(['blog' => [$stmt]]);
-    } else {
-        echo json_encode(
-            array("message" => "record_does_not_exist")
-        );
-    }
+  if ($num > 0) {
+    echo json_encode(['blog' => [$stmt]]);
+  } else {
+    echo json_encode(
+      array("message" => "record_does_not_exist")
+    );
+  }
 } catch (Throwable $e) {
-    http_response_code(401);
-    die('EXPIRED' . $e);
+  http_response_code(401);
+  die('EXPIRED');
 }
-?>
