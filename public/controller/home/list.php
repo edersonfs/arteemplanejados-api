@@ -8,20 +8,20 @@ use app\database\Connection;
 
 // start cors
 if (isset($_SERVER['HTTP_ORIGIN'])) {
-    header("Access-Control-Allow-Origin: {$_SERVER['HTTP_ORIGIN']}");
-    header('Access-Control-Allow-Credentials: true');
-    header('Access-Control-Max-Age: 86400');    // cache for 1 day
+  header("Access-Control-Allow-Origin: {$_SERVER['HTTP_ORIGIN']}");
+  header('Access-Control-Allow-Credentials: true');
+  header('Access-Control-Max-Age: 86400');    // cache for 1 day
 }
 
 // Access-Control headers are received during OPTIONS requests
 if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
-    if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_METHOD']))
-        header("Access-Control-Allow-Methods: GET, POST, OPTIONS");         
+  if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_METHOD']))
+    header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
 
-    if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']))
-        header("Access-Control-Allow-Headers: {$_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']}");
+  if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']))
+    header("Access-Control-Allow-Headers: {$_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']}");
 
-    exit(0);
+  exit(0);
 }
 
 // required header
@@ -40,51 +40,50 @@ $token = str_replace('Bearer ', '', $authorization);
 include_once '../../../app/database/Connection.php';
 include_once '../../model/home.php';
 include_once '../../utils/utils.php';
- 
+
 // instantiate database and category object
 $conn = new Connection();
 $db = $conn->connect();
 
-try {        
-    // $decoded = JWT::decode($token, new Key($_SERVER['KEY'], 'HS256'));
+try {
+  // $decoded = JWT::decode($token, new Key($_SERVER['KEY'], 'HS256'));
 
-    // initialize object
-    $home = new Home($db); 
-    $utils = new Utils(); 
+  // initialize object
+  $home = new Home($db);
+  $utils = new Utils();
 
-    $page = isset($_GET['page']) ? intval($_GET['page']) : 1;
-    $limit = isset($_GET['limit']) ? intval($_GET['limit']) : 9999;
-    $offset = ($page - 1) * $limit;
+  $page = isset($_GET['page']) ? intval($_GET['page']) : 1;
+  $limit = isset($_GET['limit']) ? intval($_GET['limit']) : 9999;
+  $offset = ($page - 1) * $limit;
 
-    $stmt = $home->getAll();
-    $stmt_pag = $home->getPagination($limit, $offset);
-    $total = is_array($stmt) ? count($stmt) : $stmt->rowCount();
+  $stmt = $home->getAll();
+  $stmt_pag = $home->getPagination($limit, $offset);
+  $total = is_array($stmt) ? count($stmt) : $stmt->rowCount();
 
-    if (is_array($stmt)) {
-        $num = count($stmt);
-    } else {
-        $num = $stmt->rowCount();
-    }
+  if (is_array($stmt)) {
+    $num = count($stmt);
+  } else {
+    $num = $stmt->rowCount();
+  }
 
-    $stmt = $utils->utf8ize($stmt);
+  $stmt = $utils->utf8ize($stmt);
+  $stmt_pag = $utils->utf8ize($stmt_pag);
 
-    // check if more than 0 record found
-    if($num > 0) {    
-        echo json_encode([
-            'home' => $stmt_pag,
-            "total" => $total,
-            "page" => $page,
-            "totalPages" => ceil($total / $limit),
-            "limit" => $limit
-        ]);
-    } else {
-        echo json_encode(
-            array("message" => "record_does_not_exist")
-        );
-    }  
+  // check if more than 0 record found
+  if ($num > 0) {
+    echo json_encode([
+      'home' => $stmt_pag,
+      "total" => $total,
+      "page" => $page,
+      "totalPages" => ceil($total / $limit),
+      "limit" => $limit
+    ]);
+  } else {
+    echo json_encode(
+      array("message" => "record_does_not_exist")
+    );
+  }
 } catch (Throwable $e) {
   http_response_code(401);
   die('EXPIRED' . $e);
 }
-
-?>
