@@ -15,10 +15,10 @@ if (isset($_SERVER['HTTP_ORIGIN'])) {
 if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
 
   if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_METHOD']))
-      header("Access-Control-Allow-Methods: GET, POST, PUT, OPTIONS");         
+    header("Access-Control-Allow-Methods: GET, POST, PUT, OPTIONS");
 
   if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']))
-      header("Access-Control-Allow-Headers: {$_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']}");
+    header("Access-Control-Allow-Headers: {$_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']}");
 
   exit(0);
 }
@@ -42,60 +42,59 @@ $conn = new Connection();
 $db = $conn->connect();
 
 try {
-    $decoded = JWT::decode($token, new Key($_SERVER['KEY'], 'HS256'));
+  $decoded = JWT::decode($token, new Key($_SERVER['KEY'], 'HS256'));
 
-    $work = new Work($db);
+  $work = new Work($db);
 
-    $oldWork = $work->getById($_POST['id']);    
-    
-    $image_file = $oldWork['image_file'];
-    $image_path = $oldWork['image_path'];
+  $oldWork = $work->getById($_POST['id']);
 
-    if (isset($_FILES['image_file']) && $_FILES['image_file']['error'] === UPLOAD_ERR_OK) {
-        $uploadDir = dirname(__FILE__, 3) . '/wwwroot/images/';
-        
-        if (!file_exists($uploadDir)) {
-            mkdir($uploadDir, 0777, true);
-        }
+  $image_file = $oldWork['image_file'];
+  $image_path = $oldWork['image_path'];
 
-        $extension = pathinfo($_FILES['image_file']['name'], PATHINFO_EXTENSION);
-        $fileName = uniqid('img_', true) . '.' . $extension;
-        $targetPath = $uploadDir . $fileName;
-        
-        if (move_uploaded_file($_FILES['image_file']['tmp_name'], $targetPath)) {
-            $image_file = $fileName;
-            $image_path = 'wwwroot/images/' . $fileName;
-        } else {
-            http_response_code(500);
-            die('Error uploading file');
-        }
+  if (isset($_FILES['image_file']) && $_FILES['image_file']['error'] === UPLOAD_ERR_OK) {
+    $uploadDir = dirname(__FILE__, 3) . '/wwwroot/images/';
+
+    if (!file_exists($uploadDir)) {
+      mkdir($uploadDir, 0777, true);
     }
 
-    $data = [
-        'id' => $_POST['id'] ?? null,
-        'type' => $_POST['type'] ?? null,
-        'neighborhood' => $_POST['neighborhood'] ?? null,
-        'city' => $_POST['city'] ?? null,
-        'image_file' => $image_file,
-        'image_path' => $image_path,  
-        'updated_user_id' => $_POST['updated_user_id'] ?? null,
-        'updated_date' => date('Y-m-d H:i:s')
-    ];  
+    $extension = pathinfo($_FILES['image_file']['name'], PATHINFO_EXTENSION);
+    $fileName = uniqid('img_', true) . '.' . $extension;
+    $targetPath = $uploadDir . $fileName;
 
-    if ($work->existsByTypeNeighborhoodCityWhenEdit($data['type'], $data['neighborhood'], $data['city'], $data['id'])) {
-      echo json_encode([
-          "message" => "record_already_exists"
-      ]);
-      exit;
-    } 
-
-    if($work->update($data)) {         
-        echo json_encode(['work' => []]);
+    if (move_uploaded_file($_FILES['image_file']['tmp_name'], $targetPath)) {
+      $image_file = $fileName;
+      $image_path = 'wwwroot/images/' . $fileName;
     } else {
-        echo json_encode(array("message" => "error_updating_record"));
-    } 
+      http_response_code(500);
+      die('Error uploading file');
+    }
+  }
+
+  $data = [
+    'id' => $_POST['id'] ?? null,
+    'type' => $_POST['type'] ?? null,
+    'neighborhood' => $_POST['neighborhood'] ?? null,
+    'city' => $_POST['city'] ?? null,
+    'image_file' => $image_file,
+    'image_path' => $image_path,
+    'updated_user_id' => $_POST['updated_user_id'] ?? null,
+    'updated_date' => date('Y-m-d H:i:s')
+  ];
+
+  if ($work->existsByTypeNeighborhoodCityWhenEdit($data['type'], $data['neighborhood'], $data['city'], $data['id'])) {
+    echo json_encode([
+      "message" => "record_already_exists"
+    ]);
+    exit;
+  }
+
+  if ($work->update($data)) {
+    echo json_encode(['work' => []]);
+  } else {
+    echo json_encode(array("message" => "error_updating_record"));
+  }
 } catch (Throwable $e) {
-    http_response_code(401);
-    die('EXPIRED' . $e);
+  http_response_code(401);
+  die('EXPIRED');
 }
-?>

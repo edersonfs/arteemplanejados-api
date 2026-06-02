@@ -9,20 +9,20 @@ use app\database\Connection;
 // start cors
 
 if (isset($_SERVER['HTTP_ORIGIN'])) {
-    header("Access-Control-Allow-Origin: {$_SERVER['HTTP_ORIGIN']}");
-    header('Access-Control-Allow-Credentials: true');
-    header('Access-Control-Max-Age: 86400');    // cache for 1 day
+  header("Access-Control-Allow-Origin: {$_SERVER['HTTP_ORIGIN']}");
+  header('Access-Control-Allow-Credentials: true');
+  header('Access-Control-Max-Age: 86400');    // cache for 1 day
 }
 
 // Access-Control headers are received during OPTIONS requests
 if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
-    if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_METHOD']))
-        header("Access-Control-Allow-Methods: GET, POST, OPTIONS");         
+  if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_METHOD']))
+    header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
 
-    if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']))
-        header("Access-Control-Allow-Headers: {$_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']}");
+  if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']))
+    header("Access-Control-Allow-Headers: {$_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']}");
 
-    exit(0);
+  exit(0);
 }
 
 // required header
@@ -42,43 +42,41 @@ $token = str_replace('Bearer ', '', $authorization);
 include_once '../../../app/database/Connection.php';
 include_once '../../model/collaborator.php';
 include_once '../../utils/utils.php';
- 
+
 // instantiate database and category object
 $conn = new Connection();
 $db = $conn->connect();
 
-try {        
-    $decoded = JWT::decode($token, new Key($_SERVER['KEY'], 'HS256'));
+try {
+  $decoded = JWT::decode($token, new Key($_SERVER['KEY'], 'HS256'));
 
-    // initialize object
-    $collaborator = new Collaborator($db);    
-    $utils = new Utils();  
+  // initialize object
+  $collaborator = new Collaborator($db);
+  $utils = new Utils();
 
-    // parameters
-    $search = filter_input(INPUT_GET, 'search', FILTER_DEFAULT);
-    $search = "%$search%"; // Add wildcards for LIKE search
+  // parameters
+  $search = filter_input(INPUT_GET, 'search', FILTER_DEFAULT);
+  $search = "%$search%"; // Add wildcards for LIKE search
 
-    $stmt = $collaborator->search($search);
+  $stmt = $collaborator->search($search);
 
-    if (is_array($stmt)) {
-        $num = count($stmt);
-    } else {
-        $num = 0;
-    }
+  if (is_array($stmt)) {
+    $num = count($stmt);
+  } else {
+    $num = 0;
+  }
 
-    $stmt = $utils->utf8ize($stmt);
-    
-    // check if more than 0 record found
-    if($num > 0) {
-        echo json_encode(['collaborator' => [$stmt]]);
-    } else {
-        echo json_encode(
-            array("message" => "record_does_not_found")
-        );
-    }  
+  $stmt = $utils->utf8ize($stmt);
+
+  // check if more than 0 record found
+  if ($num > 0) {
+    echo json_encode(['collaborator' => [$stmt]]);
+  } else {
+    echo json_encode(
+      array("message" => "record_does_not_found")
+    );
+  }
 } catch (Throwable $e) {
-    http_response_code(401);
-    die('EXPIRED');
+  http_response_code(401);
+  die('EXPIRED');
 }
-
-?>
