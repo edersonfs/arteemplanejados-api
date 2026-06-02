@@ -69,6 +69,7 @@ try {
   }
 
   $stmt = $utils->utf8ize($stmt);
+  $stmt_pag = $utils->utf8ize($stmt_pag);
 
   // check if more than 0 record found
   if ($num > 0) {
