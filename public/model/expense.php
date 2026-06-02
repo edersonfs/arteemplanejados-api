@@ -338,5 +338,37 @@ class Expense {
 
         return $items;
     }
+
+    public function findMaterialPurchaseExpenseId($material_id, $expense_type_id) {
+        $query = "SELECT id FROM `" . $this->table_name . "`
+            WHERE material_id = :material_id AND expense_type_id = :expense_type_id
+            ORDER BY id ASC
+            LIMIT 1";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute([
+            'material_id' => $material_id,
+            'expense_type_id' => $expense_type_id,
+        ]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return $row ? (int) $row['id'] : null;
+    }
+
+    public function findMaterialPurchaseExpenseIdByOrderItemId($order_item_id, $expense_type_id) {
+        $query = "SELECT id FROM `" . $this->table_name . "`
+            WHERE order_item_id = :order_item_id AND expense_type_id = :expense_type_id
+            ORDER BY id DESC
+            LIMIT 1";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute([
+            'order_item_id' => $order_item_id,
+            'expense_type_id' => $expense_type_id,
+        ]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return $row ? (int) $row['id'] : null;
+    }
 }
 ?>

@@ -86,10 +86,29 @@ try {
         $materialId = $oldRow['material_id'];
     }
 
+    $hours = null;
+    if (isset($_POST['hours']) && $_POST['hours'] !== '') {
+        $hours = (int) $_POST['hours'];
+    }
+
+    $fixedCost = null;
+    if (isset($_POST['fixed_cost']) && $_POST['fixed_cost'] !== '') {
+        $fixedCost = (int) $_POST['fixed_cost'];
+    }
+
+    $freight = null;
+    if (isset($_POST['freight']) && $_POST['freight'] !== '') {
+        $freight = $_POST['freight'];
+    }
+
     $data = [
         'id' => $_POST['id'] ?? null,
         'budget_id' => $budgetId,
+        'budget_item_type' => $_POST['budget_item_type'] ?? null,
         'material_id' => $materialId,
+        'hours' => $hours,
+        'fixed_cost' => $fixedCost,
+        'freight' => $freight,
         'description' => $_POST['description'] ?? null,
         'quantity' => $_POST['quantity'] ?? null,
         'width' => $_POST['width'] ?? null,

@@ -36,6 +36,8 @@ $token = str_replace('Bearer ', '', $authorization);
 include_once '../../../app/database/Connection.php';
 include_once '../../model/material.php';
 include_once '../../model/material_historical.php';
+include_once '../../model/expense.php';
+include_once '../../utils/material_historical_expense.php';
 
 $conn = new Connection();
 $db = $conn->connect();
@@ -45,6 +47,7 @@ try {
 
     $material = new Material($db);
     $materialHistorical = new MaterialHistorical($db);
+    $expense = new Expense($db);
 
     $materialId = isset($_POST['id']) ? (int) $_POST['id'] : null;
 
@@ -92,6 +95,17 @@ try {
     $companyId = isset($_POST['company_id']) ? (int) $_POST['company_id'] : (int) $oldRow['company_id'];
     $supplierId = isset($_POST['supplier_id']) ? (int) $_POST['supplier_id'] : (int) $oldRow['supplier_id'];
 
+    if (array_key_exists('material_type_id', $_POST)) {
+        if ($_POST['material_type_id'] === '' || $_POST['material_type_id'] === null) {
+            $materialTypeId = null;
+        } else {
+            $materialTypeId = (int) $_POST['material_type_id'];
+        }
+    } else {
+        $mtid = $oldRow['material_type_id'] ?? null;
+        $materialTypeId = ($mtid === null || $mtid === '') ? null : (int) $mtid;
+    }
+
     $currentStock = max(0.0, (float) ($oldRow['stock'] ?? 0));
     $newStock = $currentStock + $stockToAdd;
 
@@ -111,6 +125,7 @@ try {
         'id' => $materialId,
         'company_id' => $companyId,
         'supplier_id' => $supplierId,
+        'material_type_id' => $materialTypeId,
         'name' => $_POST['name'] ?? $oldRow['name'],
         'description' => $description,
         'unit_cost' => $unitCost,
@@ -150,6 +165,19 @@ try {
     }
 
     if (!$materialHistorical->create($historicalData)) {
+        $db->rollBack();
+        echo json_encode(array("message" => "error_creating_record"));
+        exit;
+    }
+
+    $audit = [
+        'created_user_id' => $historicalData['created_user_id'],
+        'created_date' => $historicalData['created_date'],
+        'updated_user_id' => $historicalData['updated_user_id'],
+        'updated_date' => $historicalData['updated_date'],
+    ];
+
+    if (!material_historical_expense_sync_on_create($expense, $db, $material, $historicalData, $audit)) {
         $db->rollBack();
         echo json_encode(array("message" => "error_creating_record"));
         exit;

@@ -289,5 +289,16 @@ class Order {
 
         return $stmt->rowCount() > 0;
     }
+
+    public function existsByBudgetId($budget_id) {
+        $query = "SELECT * FROM `" . $this->table_name . "` WHERE budget_id = :budget_id";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute([
+            'budget_id' => $budget_id,
+        ]);
+
+        return $stmt->rowCount() > 0;
+    }
 }
 ?>

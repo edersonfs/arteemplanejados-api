@@ -99,6 +99,17 @@ try {
     $companyId = isset($_POST['company_id']) ? (int) $_POST['company_id'] : (int) $oldRow['company_id'];
     $supplierId = isset($_POST['supplier_id']) ? (int) $_POST['supplier_id'] : (int) $oldRow['supplier_id'];
 
+    if (array_key_exists('material_type_id', $_POST)) {
+        if ($_POST['material_type_id'] === '' || $_POST['material_type_id'] === null) {
+            $materialTypeId = null;
+        } else {
+            $materialTypeId = (int) $_POST['material_type_id'];
+        }
+    } else {
+        $mtid = $oldRow['material_type_id'] ?? null;
+        $materialTypeId = ($mtid === null || $mtid === '') ? null : (int) $mtid;
+    }
+
     $newStock = $currentStock - $stockToRemove;
 
     $description = array_key_exists('description', $_POST)
@@ -117,6 +128,7 @@ try {
         'id' => $materialId,
         'company_id' => $companyId,
         'supplier_id' => $supplierId,
+        'material_type_id' => $materialTypeId,
         'name' => $_POST['name'] ?? $oldRow['name'],
         'description' => $description,
         'unit_cost' => $unitCost,

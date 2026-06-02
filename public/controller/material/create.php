@@ -36,6 +36,8 @@ $token = str_replace('Bearer ', '', $authorization);
 include_once '../../../app/database/Connection.php';
 include_once '../../model/material.php';
 include_once '../../model/material_historical.php';
+include_once '../../model/expense.php';
+include_once '../../utils/material_historical_expense.php';
 
 $conn = new Connection();
 $db = $conn->connect();
@@ -45,6 +47,7 @@ try {
 
     $material = new Material($db);
     $materialHistorical = new MaterialHistorical($db);
+    $expense = new Expense($db);
 
     if (isset($_FILES['image_file']) && $_FILES['image_file']['error'] === UPLOAD_ERR_OK) {
         $uploadDir = dirname(__FILE__, 3) . '/wwwroot/images/';
@@ -83,9 +86,15 @@ try {
         exit;
     }
 
+    $materialTypeId = null;
+    if (isset($_POST['material_type_id']) && $_POST['material_type_id'] !== '') {
+        $materialTypeId = (int) $_POST['material_type_id'];
+    }
+
     $data = [
         'company_id' => $companyId,
         'supplier_id' => $supplierId,
+        'material_type_id' => $materialTypeId,
         'name' => $_POST['name'] ?? null,
         'description' => $_POST['description'] ?? null,
         'unit_cost' => $_POST['unit_cost'] ?? null,
@@ -127,6 +136,19 @@ try {
     ];
 
     if (!$materialHistorical->create($historicalData)) {
+        $db->rollBack();
+        echo json_encode(array("message" => "error_creating_record"));
+        exit;
+    }
+
+    $audit = [
+        'created_user_id' => $data['created_user_id'],
+        'created_date' => $data['created_date'],
+        'updated_user_id' => $data['updated_user_id'],
+        'updated_date' => $data['updated_date'],
+    ];
+
+    if (!material_historical_expense_sync_on_create($expense, $db, $material, $historicalData, $audit)) {
         $db->rollBack();
         echo json_encode(array("message" => "error_creating_record"));
         exit;

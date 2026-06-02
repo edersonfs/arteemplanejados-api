@@ -34,7 +34,7 @@ $authorization = $_SERVER['HTTP_AUTHORIZATION'];
 $token = str_replace('Bearer ', '', $authorization);
 
 include_once '../../../app/database/Connection.php';
-include_once '../../model/budget_item.php';
+include_once '../../model/income.php';
 
 $conn = new Connection();
 $db = $conn->connect();
@@ -42,7 +42,7 @@ $db = $conn->connect();
 try {
     $decoded = JWT::decode($token, new Key($_SERVER['KEY'], 'HS256'));
 
-    $budgetItem = new BudgetItem($db);
+    $income = new Income($db);
 
     if (isset($_FILES['image_file']) && $_FILES['image_file']['error'] === UPLOAD_ERR_OK) {
         $uploadDir = dirname(__FILE__, 3) . '/wwwroot/images/';
@@ -67,46 +67,32 @@ try {
         $image_path = null;
     }
 
-    $budgetId = isset($_POST['budget_id']) ? (int) $_POST['budget_id'] : null;
+    $companyId = isset($_POST['company_id']) ? (int) $_POST['company_id'] : null;
 
-    if (empty($budgetId)) {
-        echo json_encode(array("message" => "missing_budget_id"));
+    if (empty($companyId)) {
+        echo json_encode(array("message" => "missing_company_id"));
         exit;
     }
 
-    $materialId = null;
-    if (isset($_POST['material_id']) && $_POST['material_id'] !== '') {
-        $materialId = (int) $_POST['material_id'];
+    $internalClientId = null;
+    if (isset($_POST['internal_client_id']) && $_POST['internal_client_id'] !== '') {
+        $internalClientId = (int) $_POST['internal_client_id'];
     }
 
-    $hours = null;
-    if (isset($_POST['hours']) && $_POST['hours'] !== '') {
-        $hours = (int) $_POST['hours'];
-    }
-
-    $fixedCost = null;
-    if (isset($_POST['fixed_cost']) && $_POST['fixed_cost'] !== '') {
-        $fixedCost = (int) $_POST['fixed_cost'];
-    }
-
-    $freight = null;
-    if (isset($_POST['freight']) && $_POST['freight'] !== '') {
-        $freight = $_POST['freight'];
+    $orderId = null;
+    if (isset($_POST['order_id']) && $_POST['order_id'] !== '') {
+        $orderId = (int) $_POST['order_id'];
     }
 
     $data = [
-        'budget_id' => $budgetId,
-        'budget_item_type' => $_POST['budget_item_type'] ?? null,
-        'material_id' => $materialId,
-        'hours' => $hours,
-        'fixed_cost' => $fixedCost,
-        'freight' => $freight,
-        'description' => $_POST['description'] ?? null,
-        'quantity' => $_POST['quantity'] ?? null,
-        'width' => $_POST['width'] ?? null,
-        'height' => $_POST['height'] ?? null,
-        'unit_price' => $_POST['unit_price'] ?? null,
-        'total' => $_POST['total'] ?? null,
+        'company_id' => $companyId,
+        'internal_client_id' => $internalClientId,
+        'order_id' => $orderId,
+        'amount' => $_POST['amount'] ?? null,
+        'due_date' => $_POST['due_date'] ?? null,
+        'payment_date' => $_POST['payment_date'] ?? null,
+        'payment_method' => $_POST['payment_method'] ?? null,
+        'status' => $_POST['status'] ?? null,
         'image_file' => $image_file,
         'image_path' => $image_path,
         'created_user_id' => $_POST['created_user_id'] ?? null,
@@ -115,8 +101,8 @@ try {
         'updated_date' => $_POST['updated_date'] ?? null
     ];
 
-    if ($budgetItem->create($data)) {
-        echo json_encode(['budget_item' => []]);
+    if ($income->create($data)) {
+        echo json_encode(['income' => []]);
     } else {
         echo json_encode(array("message" => "error_creating_record"));
     }

@@ -35,6 +35,8 @@ $token = str_replace('Bearer ', '', $authorization);
 
 include_once '../../../app/database/Connection.php';
 include_once '../../model/budget.php';
+include_once '../../model/order.php';
+include_once '../../utils/budget_order.php';
 
 $conn = new Connection();
 $db = $conn->connect();
@@ -105,6 +107,14 @@ try {
     }
 
     if ($budget->update($data)) {
+        $order = new Order($db);
+        $budgetRow = $budget->getById($data['id']);
+
+        if (!budget_order_sync_if_approved($order, (int) $data['id'], $budgetRow)) {
+            echo json_encode(array("message" => "error_creating_order"));
+            exit;
+        }
+
         echo json_encode(['budget' => []]);
     } else {
         echo json_encode(array("message" => "error_updating_record"));

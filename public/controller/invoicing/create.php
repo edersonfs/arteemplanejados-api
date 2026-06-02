@@ -34,10 +34,7 @@ $authorization = $_SERVER['HTTP_AUTHORIZATION'];
 $token = str_replace('Bearer ', '', $authorization);
 
 include_once '../../../app/database/Connection.php';
-include_once '../../model/material_historical.php';
-include_once '../../model/material.php';
-include_once '../../model/expense.php';
-include_once '../../utils/material_historical_expense.php';
+include_once '../../model/invoicing.php';
 
 $conn = new Connection();
 $db = $conn->connect();
@@ -45,16 +42,7 @@ $db = $conn->connect();
 try {
     $decoded = JWT::decode($token, new Key($_SERVER['KEY'], 'HS256'));
 
-    $materialHistorical = new MaterialHistorical($db);
-    $material = new Material($db);
-    $expense = new Expense($db);
-
-    $materialId = isset($_POST['material_id']) ? (int) $_POST['material_id'] : null;
-
-    if (empty($materialId)) {
-        echo json_encode(array("message" => "missing_material_id"));
-        exit;
-    }
+    $invoicing = new Invoicing($db);
 
     $companyId = isset($_POST['company_id']) ? (int) $_POST['company_id'] : null;
 
@@ -63,63 +51,39 @@ try {
         exit;
     }
 
-    $supplierId = null;
-    if (isset($_POST['supplier_id']) && $_POST['supplier_id'] !== '') {
-        $supplierId = (int) $_POST['supplier_id'];
-    }
+    $month = isset($_POST['month']) ? (int) $_POST['month'] : null;
+    $year = isset($_POST['year']) ? (int) $_POST['year'] : null;
 
-    $orderItemId = null;
-    if (isset($_POST['order_item_id']) && $_POST['order_item_id'] !== '') {
-        $orderItemId = (int) $_POST['order_item_id'];
-    }
-
-    $movementType = $_POST['movement_type'] ?? null;
-
-    if ($movementType === null || $movementType === '') {
-        echo json_encode(array("message" => "missing_movement_type"));
+    if (empty($month) || empty($year)) {
+        echo json_encode(array("message" => "missing_month_or_year"));
         exit;
     }
 
     $data = [
-        'material_id' => $materialId,
         'company_id' => $companyId,
-        'supplier_id' => $supplierId,
-        'order_item_id' => $orderItemId,
-        'explanation' => $_POST['explanation'] ?? null,
-        'quantity' => $_POST['quantity'] ?? null,
-        'unit_cost' => $_POST['unit_cost'] ?? null,
-        'sales_price' => $_POST['sales_price'] ?? null,
-        'stock' => $_POST['stock'] ?? null,
-        'movement_type' => $movementType,
+        'month' => $month,
+        'year' => $year,
+        'total_income' => $_POST['total_income'] ?? null,
+        'total_expense' => $_POST['total_expense'] ?? null,
+        'total_profit' => $_POST['total_profit'] ?? null,
         'created_user_id' => $_POST['created_user_id'] ?? null,
         'created_date' => $_POST['created_date'] ?? null,
         'updated_user_id' => $_POST['updated_user_id'] ?? null,
         'updated_date' => $_POST['updated_date'] ?? null
     ];
 
-    $audit = [
-        'created_user_id' => $data['created_user_id'],
-        'created_date' => $data['created_date'],
-        'updated_user_id' => $data['updated_user_id'],
-        'updated_date' => $data['updated_date'],
-    ];
-
-    $db->beginTransaction();
-
-    if (!$materialHistorical->create($data)) {
-        $db->rollBack();
-        echo json_encode(array("message" => "error_creating_record"));
+    if ($invoicing->existsByMonthYear($month, $year, $companyId)) {
+        echo json_encode([
+            "message" => "record_already_exists"
+        ]);
         exit;
     }
 
-    if (!material_historical_expense_sync_on_create($expense, $db, $material, $data, $audit)) {
-        $db->rollBack();
+    if ($invoicing->create($data)) {
+        echo json_encode(['invoicing' => []]);
+    } else {
         echo json_encode(array("message" => "error_creating_record"));
-        exit;
     }
-
-    $db->commit();
-    echo json_encode(['material_historical' => []]);
 } catch (Throwable $e) {
     http_response_code(401);
     die('EXPIRED');

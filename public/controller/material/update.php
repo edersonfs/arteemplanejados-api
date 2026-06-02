@@ -36,6 +36,8 @@ $token = str_replace('Bearer ', '', $authorization);
 include_once '../../../app/database/Connection.php';
 include_once '../../model/material.php';
 include_once '../../model/material_historical.php';
+include_once '../../model/expense.php';
+include_once '../../utils/material_historical_expense.php';
 
 $conn = new Connection();
 $db = $conn->connect();
@@ -45,6 +47,7 @@ try {
 
     $material = new Material($db);
     $materialHistorical = new MaterialHistorical($db);
+    $expense = new Expense($db);
 
 
     $oldRow = $material->getById($_POST['id']);
@@ -79,10 +82,22 @@ try {
     $companyId = isset($_POST['company_id']) ? (int) $_POST['company_id'] : (int) $oldRow['company_id'];
     $supplierId = isset($_POST['supplier_id']) ? (int) $_POST['supplier_id'] : (int) $oldRow['supplier_id'];
 
+    if (array_key_exists('material_type_id', $_POST)) {
+        if ($_POST['material_type_id'] === '' || $_POST['material_type_id'] === null) {
+            $materialTypeId = null;
+        } else {
+            $materialTypeId = (int) $_POST['material_type_id'];
+        }
+    } else {
+        $mtid = $oldRow['material_type_id'] ?? null;
+        $materialTypeId = ($mtid === null || $mtid === '') ? null : (int) $mtid;
+    }
+
     $data = [
         'id' => $_POST['id'] ?? null,
         'company_id' => $companyId,
         'supplier_id' => $supplierId,
+        'material_type_id' => $materialTypeId,
         'name' => $_POST['name'] ?? null,
         'description' => $_POST['description'] ?? null,
         'unit_cost' => $_POST['unit_cost'] ?? null,
@@ -137,6 +152,24 @@ try {
     }
 
     if (!$historicalOk) {
+        $db->rollBack();
+        echo json_encode(array("message" => "error_updating_record"));
+        exit;
+    }
+
+    $historicalPayload['movement_type'] = $snapshotRow ? 'ADJUSTMENT' : 'ENTRY';
+    $expenseAudit = [
+        'created_user_id' => $data['updated_user_id'],
+        'created_date' => $data['updated_date'],
+        'updated_user_id' => $data['updated_user_id'],
+        'updated_date' => $data['updated_date'],
+    ];
+
+    $expenseOk = !$snapshotRow 
+        ? material_historical_expense_sync_on_update($expense, $db, $material, $historicalPayload, $expenseAudit)
+        : true;
+
+    if (!$expenseOk) {
         $db->rollBack();
         echo json_encode(array("message" => "error_updating_record"));
         exit;

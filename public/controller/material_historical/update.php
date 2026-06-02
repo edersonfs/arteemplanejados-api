@@ -35,6 +35,9 @@ $token = str_replace('Bearer ', '', $authorization);
 
 include_once '../../../app/database/Connection.php';
 include_once '../../model/material_historical.php';
+include_once '../../model/material.php';
+include_once '../../model/expense.php';
+include_once '../../utils/material_historical_expense.php';
 
 $conn = new Connection();
 $db = $conn->connect();
@@ -43,6 +46,8 @@ try {
     $decoded = JWT::decode($token, new Key($_SERVER['KEY'], 'HS256'));
 
     $materialHistorical = new MaterialHistorical($db);
+    $material = new Material($db);
+    $expense = new Expense($db);
 
     $oldRow = $materialHistorical->getById($_POST['id']);
     if (!$oldRow) {
@@ -102,11 +107,29 @@ try {
         'updated_date' => $_POST['updated_date'] ?? $oldRow['updated_date']
     ];
 
-    if ($materialHistorical->update($data)) {
-        echo json_encode(['material_historical' => []]);
-    } else {
+    $audit = [
+        'created_user_id' => $oldRow['created_user_id'] ?? null,
+        'created_date' => $oldRow['created_date'] ?? null,
+        'updated_user_id' => $data['updated_user_id'],
+        'updated_date' => $data['updated_date'],
+    ];
+
+    $db->beginTransaction();
+
+    if (!$materialHistorical->update($data)) {
+        $db->rollBack();
         echo json_encode(array("message" => "error_updating_record"));
+        exit;
     }
+
+    if (!material_historical_expense_sync_on_update($expense, $db, $material, $data, $audit)) {
+        $db->rollBack();
+        echo json_encode(array("message" => "error_updating_record"));
+        exit;
+    }
+
+    $db->commit();
+    echo json_encode(['material_historical' => []]);
 } catch (Throwable $e) {
     http_response_code(401);
     die('EXPIRED');

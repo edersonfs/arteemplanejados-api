@@ -37,6 +37,8 @@ include_once '../../../app/database/Connection.php';
 include_once '../../model/order_item.php';
 include_once '../../model/material.php';
 include_once '../../model/material_historical.php';
+include_once '../../model/expense.php';
+include_once '../../utils/material_historical_expense.php';
 
 $conn = new Connection();
 $db = $conn->connect();
@@ -47,6 +49,7 @@ try {
     $orderItem = new OrderItem($db);
     $material = new Material($db);
     $materialHistorical = new MaterialHistorical($db);
+    $expense = new Expense($db);
 
     if (isset($_FILES['image_file']) && $_FILES['image_file']['error'] === UPLOAD_ERR_OK) {
         $uploadDir = dirname(__FILE__, 3) . '/wwwroot/images/';
@@ -220,7 +223,7 @@ try {
                 'EXIT',
                 0,
                 null,
-                $shortage
+                $availableStock
             );
             if (!$materialHistorical->create($histExit)) {
                 $db->rollBack();
@@ -231,15 +234,29 @@ try {
             $orderLineUnitPrice = array_key_exists('unit_price', $_POST)
                 ? $_POST['unit_price']
                 : $data['unit_cost'];
+                
             $histBought = $buildHistoricalFromMaterial(
                 $matRow,
                 $newOrderItemId,
                 'BOUGHT TRHOUGH STORE',
                 0,
                 $orderLineUnitPrice,
-                $availableStock
+                $shortage
             );
             if (!$materialHistorical->create($histBought)) {
+                $db->rollBack();
+                echo json_encode(array("message" => "error_creating_record"));
+                exit;
+            }
+
+            $expenseAudit = [
+                'created_user_id' => $data['created_user_id'],
+                'created_date' => $data['created_date'],
+                'updated_user_id' => $data['updated_user_id'],
+                'updated_date' => $data['updated_date'],
+            ];
+
+            if (!material_historical_expense_sync_on_create($expense, $db, $material, $histBought, $expenseAudit)) {
                 $db->rollBack();
                 echo json_encode(array("message" => "error_creating_record"));
                 exit;
