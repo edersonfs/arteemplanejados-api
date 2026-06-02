@@ -65,6 +65,7 @@ try {
   }
 
   $stmt = $utils->utf8ize($stmt);
+  $stmt_pag = $utils->utf8ize($stmt_pag);
 
   if ($num > 0) {
     echo json_encode([
