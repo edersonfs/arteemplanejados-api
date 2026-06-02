@@ -27,13 +27,14 @@ class User {
 
     public function create($data) {       
         $query = "INSERT INTO `" . $this->table_name . "`
-            (group_id, name, email, password, active, image_file, image_path, created_user_id, created_date, updated_user_id, updated_date)
+            (group_id, company_id, name, email, password, active, image_file, image_path, created_user_id, created_date, updated_user_id, updated_date)
             VALUES
-            (:group_id, :name, :email, :password, :active, :image_file, :image_path, :created_user_id, :created_date, :updated_user_id, :updated_date)";
+            (:group_id, :company_id, :name, :email, :password, :active, :image_file, :image_path, :created_user_id, :created_date, :updated_user_id, :updated_date)";
 
         $stmt = $this->conn->prepare($query);
 
         $stmt->bindParam(':group_id', $data['group_id'], PDO::PARAM_INT);
+        $stmt->bindParam(':company_id', $data['company_id'], PDO::PARAM_INT);
         $stmt->bindParam(':name', $data['name']);
         $stmt->bindParam(':email', $data['email']);
         $stmt->bindParam(':password', $data['password']);
@@ -51,6 +52,7 @@ class User {
     public function update($data) {       
         $query = "UPDATE `" . $this->table_name . "`
                 SET group_id = :group_id,
+                    company_id = :company_id,
                     name = :name,
                     email = :email,                    
                     active = :active,
@@ -63,6 +65,7 @@ class User {
         $stmt = $this->conn->prepare($query);
 
         $stmt->bindParam(':group_id', $data['group_id'], PDO::PARAM_INT);
+        $stmt->bindParam(':company_id', $data['company_id'], PDO::PARAM_INT);
         $stmt->bindParam(':name', $data['name']);
         $stmt->bindParam(':email', $data['email']);
         $stmt->bindParam(':active', $data['active'], PDO::PARAM_INT);
@@ -92,12 +95,14 @@ class User {
 
     //GET
 
-    public function getAll() {    
+    public function getAll($company_id, $group_id) {    
         $query = "
             SELECT 
                 us.id as id, 
                 gr.id as group_id,
                 gr.name as group_name,
+                co.id as company_id,
+                co.name as company_name,
                 us.name as name, 
                 us.email as email, 
                 us.active as active, 
@@ -112,12 +117,14 @@ class User {
             FROM 
                 `" . $this->table_name . "` us 
                 inner join `group` gr on us.group_id = gr.id
+                inner join `company` co on us.company_id = co.id
                 inner join `user` upus on us.updated_user_id = upus.id 
                 inner join `user` crus on us.created_user_id = crus.id
+            WHERE us.company_id = :company_id or :group_id = 1
             ORDER BY us.name";  
 
         $stmt = $this->conn->prepare( $query );
-        $stmt->execute();
+        $stmt->execute(['company_id' => $company_id, 'group_id' => $group_id]);
     
         $users = [];
 
@@ -128,12 +135,14 @@ class User {
         return $users;
     }
 
-    public function getPagination($limit, $offset) {
+    public function getPagination($limit, $offset, $company_id, $group_id) {
         $query = "
              SELECT 
                 us.id as id, 
                 gr.id as group_id,
                 gr.name as group_name,
+                co.id as company_id,
+                co.name as company_name,
                 us.name as name, 
                 us.email as email, 
                 us.active as active, 
@@ -148,13 +157,15 @@ class User {
             FROM 
                 `" . $this->table_name . "` us
                 inner join `group` gr on us.group_id = gr.id
+                inner join `company` co on us.company_id = co.id
                 inner join `user` upus on us.updated_user_id = upus.id 
                 inner join `user` crus on us.created_user_id = crus.id
+            WHERE us.company_id = :company_id or :group_id = 1
             ORDER BY us.created_date DESC
             LIMIT $limit OFFSET $offset";
 
         $stmt = $this->conn->prepare($query);
-        $stmt->execute();
+        $stmt->execute(['company_id' => $company_id, 'group_id' => $group_id]);
         
         $items = [];
 
@@ -165,41 +176,47 @@ class User {
         return $items;
     }
 
-    public function getById($id) {    
+    public function getById($id, $group_id, $company_id) {    
         $query = "
             SELECT 
-                us.id as id, 
-                gr.id as group_id,
-                us.name as name, 
-                us.email as email, 
-                us.active as active, 
-                us.image_file as image_file,
-                us.image_path as image_path,
-                us.created_user_id as created_user_id, 
-                us.created_date as created_date, 
-                crus.name as created_user_name,
-                us.updated_user_id as updated_user_id, 
-                us.updated_date as updated_date, 
-                upus.name as updated_user_name 
+              us.id as id, 
+              gr.id as group_id,
+              co.id as company_id,                
+              us.name as name, 
+              us.email as email, 
+              us.active as active, 
+              us.image_file as image_file,
+              us.image_path as image_path,
+              us.created_user_id as created_user_id, 
+              us.created_date as created_date, 
+              crus.name as created_user_name,
+              us.updated_user_id as updated_user_id, 
+              us.updated_date as updated_date, 
+              upus.name as updated_user_name 
             FROM 
-                `" . $this->table_name . "` us 
-                inner join `group` gr on us.group_id = gr.id
-                inner join `user` upus on us.updated_user_id = upus.id 
-                inner join `user` crus on us.created_user_id = crus.id
-            WHERE us.id = :id";    
+              `" . $this->table_name . "` us 
+              inner join `group` gr on us.group_id = gr.id
+              inner join `company` co on us.company_id = co.id
+              inner join `user` upus on us.updated_user_id = upus.id 
+              inner join `user` crus on us.created_user_id = crus.id
+            WHERE 
+              us.id = :id 
+            and (us.company_id = :company_id or :group_id = 1)";    
 
         $stmt = $this->conn->prepare( $query );
-        $stmt->execute(['id' => $id]);
+        $stmt->execute(['id' => $id, 'group_id' => $group_id, 'company_id' => $company_id]);
     
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function search($search, $limit, $offset) {
+    public function search($search, $limit, $offset, $group_id, $company_id) {
         $query = "
             SELECT 
                 us.id as id, 
                 gr.id as group_id,
                 gr.name as `group`,
+                co.id as company_id,
+                co.name as company_name,
                 us.name as name,
                 us.email as email, 
                 us.active as active, 
@@ -211,16 +228,17 @@ class User {
             FROM 
                 `" . $this->table_name . "` us 
                 inner join `group` gr on us.group_id = gr.id
+                inner join `company` co on us.company_id = co.id
                 inner join `user` upus on us.id = upus.id 
             WHERE 
-                LOWER(us.name) LIKE LOWER('%$search%') 
+                (LOWER(us.name) LIKE LOWER('%$search%') and (us.company_id = :company_id or :group_id = 1))
                 OR LOWER(us.email) LIKE LOWER('%$search%')
                 OR LOWER(gr.name) LIKE LOWER('%$search%')
             ORDER BY us.name
             LIMIT $limit OFFSET $offset";    
 
         $stmt = $this->conn->prepare($query);
-        $stmt->execute();
+        $stmt->execute(['group_id' => $group_id, 'company_id' => $company_id]);
         
         $items = [];
 

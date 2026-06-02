@@ -48,6 +48,8 @@ $db = $conn->connect();
 try {
     $decoded = JWT::decode($token, new Key($_SERVER['KEY'], 'HS256'));
 
+    $group_id = isset($decoded->group_id) ? (int) $decoded->group_id : null;
+
     // Get search term parameter
     $searchTerm = isset($_GET['search_term']) ? $_GET['search_term'] : '';
 
@@ -63,7 +65,7 @@ try {
     $limit = isset($_GET['limit']) ? intval($_GET['limit']) : 9999;
     $offset = ($page - 1) * $limit;
 
-    $stmt_pag = $group->search($search, $limit, $offset);
+    $stmt_pag = $group->search($search, $limit, $offset, $group_id);
     $total = is_array($stmt_pag) ? count($stmt_pag) : $stmt_pag->rowCount();
 
     if (is_array($stmt_pag)) {

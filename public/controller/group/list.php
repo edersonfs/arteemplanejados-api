@@ -48,6 +48,8 @@ $db = $conn->connect();
 try {
     $decoded = JWT::decode($token, new Key($_SERVER['KEY'], 'HS256'));
 
+    $group_id = isset($decoded->group_id) ? (int) $decoded->group_id : null;    
+
     // initialize object
     $group = new Group($db); 
     $utils = new Utils();
@@ -56,8 +58,8 @@ try {
     $limit = isset($_GET['limit']) ? intval($_GET['limit']) : 9999;
     $offset = ($page - 1) * $limit;
 
-    $stmt = $group->getAll();
-    $stmt_pag = $group->getPagination($limit, $offset);
+    $stmt = $group->getAll($group_id);
+    $stmt_pag = $group->getPagination($limit, $offset, $group_id);
     $total = is_array($stmt) ? count($stmt) : $stmt->rowCount();
 
     if (is_array($stmt)) {

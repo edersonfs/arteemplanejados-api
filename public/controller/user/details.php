@@ -49,6 +49,9 @@ $db = $conn->connect();
 try {        
     $decoded = JWT::decode($token, new Key($_SERVER['KEY'], 'HS256'));
 
+    $group_id = isset($decoded->group_id) ? (int) $decoded->group_id : null;
+    $company_id = isset($decoded->company_id) ? (int) $decoded->company_id : null;
+
     // initialize object
     $user = new User($db);
     $utils = new Utils();    
@@ -56,7 +59,7 @@ try {
     $id = filter_input(INPUT_GET, 'id', FILTER_DEFAULT); // FILTER_SANITIZE_STRING is deprecated
     $id = "$id"; // Add wildcards for LIKE search
 
-    $stmt = $user->getById($id);
+    $stmt = $user->getById($id, $group_id, $company_id);
 
     if (is_array($stmt)) {
         $num = count($stmt);
@@ -76,7 +79,7 @@ try {
     }    
 } catch (Throwable $e) {
     http_response_code(401);
-    die('EXPIRED');
+    die('EXPIRED' . $e);
 }
  
 ?>

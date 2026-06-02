@@ -49,6 +49,9 @@ $db = $conn->connect();
 
 try {        
     $decoded = JWT::decode($token, new Key($_SERVER['KEY'], 'HS256'));    
+    
+    $group_id = isset($decoded->group_id) ? (int) $decoded->group_id : null;
+    $company_id = isset($decoded->company_id) ? (int) $decoded->company_id : null;
 
     // initialize object
     $user = new User($db);
@@ -57,7 +60,7 @@ try {
     $data = $_POST;
     $files = $_FILES;
 
-    $oldUser = $user->getById($_POST['id']);
+    $oldUser = $user->getById($_POST['id'], $group_id, $company_id);
     
     // Handle top image upload if provided
     $image_file = $oldUser['image_file'];
@@ -73,7 +76,8 @@ try {
         }
 
         // Get file information
-        $fileName = basename($_FILES['image_file']['name']);
+        $extension = pathinfo($_FILES['image_file']['name'], PATHINFO_EXTENSION);
+        $fileName = uniqid('img_', true) . '.' . $extension;
         $targetPath = $uploadDir . $fileName;
         
         // Move uploaded file to target directory
@@ -90,6 +94,7 @@ try {
     $data = [
         'id' => $_POST['id'] ?? null,
         'group_id' => $_POST['group_id'] ?? null,
+        'company_id' => $_POST['company_id'] ?? null,
         'name' => $_POST['name'] ?? null,
         'email' => $_POST['email'] ?? null,        
         'active' => $_POST['active'] == 'true' ? 1 : 0 ?? null,    

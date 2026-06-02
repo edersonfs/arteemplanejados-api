@@ -49,6 +49,9 @@ $db = $conn->connect();
 try {        
     $decoded = JWT::decode($token, new Key($_SERVER['KEY'], 'HS256'));
 
+    $group_id = isset($decoded->group_id) ? (int) $decoded->group_id : null;
+    $company_id = isset($decoded->company_id) ? (int) $decoded->company_id : null;
+
     // initialize object
     $user = new User($db);   
     $utils = new Utils();
@@ -61,7 +64,7 @@ try {
     $limit = isset($_GET['limit']) ? intval($_GET['limit']) : 9999;
     $offset = ($page - 1) * $limit;
 
-    $stmt_pag = $user->search($search, $limit, $offset);
+    $stmt_pag = $user->search($search, $limit, $offset, $group_id, $company_id);
     $total = is_array($stmt_pag) ? count($stmt_pag) : $stmt_pag->rowCount();
 
     if (is_array($stmt_pag)) {

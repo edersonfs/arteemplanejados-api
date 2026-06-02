@@ -71,7 +71,8 @@ try {
         }
 
         // Get file information
-        $fileName = basename($_FILES['image_file']['name']) . '_' . date('Ymd_His');
+        $extension = pathinfo($_FILES['image_file']['name'], PATHINFO_EXTENSION);
+        $fileName = uniqid('img_', true) . '.' . $extension;
         $targetPath = $uploadDir . $fileName;
         
         // Move uploaded file to target directory

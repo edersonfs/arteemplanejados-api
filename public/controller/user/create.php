@@ -47,6 +47,16 @@ $db = $conn->connect();
 try {        
     $decoded = JWT::decode($token, new Key($_SERVER['KEY'], 'HS256'));
 
+    $group_id = isset($decoded->group_id) ? (int) $decoded->group_id : null;
+    $company_id = isset($decoded->company_id) ? (int) $decoded->company_id : null;
+
+    if ($group_id != 1 && $_POST['group_id'] == 1) {
+        echo json_encode([
+            "message" => "permission_denied"
+        ]);
+        exit;
+    }
+
     // initialize user object
     $user = new User($db);
 
@@ -59,8 +69,9 @@ try {
             mkdir($uploadDir, 0777, true);
         }
 
-        // Get file information
-        $fileName = basename($_FILES['image_file']['name']);
+        // Get file information        
+        $extension = pathinfo($_FILES['image_file']['name'], PATHINFO_EXTENSION);
+        $fileName = uniqid('img_', true) . '.' . $extension;
         $targetPath = $uploadDir . $fileName;
         
         // Move uploaded file to target directory
@@ -79,6 +90,7 @@ try {
     // Prepare data for insertion
     $data = [
         'group_id' => $_POST['group_id'] ?? null,
+        'company_id' => $_POST['company_id'] ?? null,
         'name' => $_POST['name'] ?? null,
         'email' => $_POST['email'] ?? null,        
         'password' => password_hash($_POST['password'] ?? null, PASSWORD_DEFAULT), 
