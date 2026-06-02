@@ -120,7 +120,7 @@ class Group
                 `" . $this->table_name . "` gr
                 inner join `user` upus on gr.updated_user_id = upus.id
                 inner join `user` crus on gr.created_user_id = crus.id
-            WHERE (gr.id <> 1 or :group_id = 1)
+            WHERE (gr.id <> 1 or $group_id = 1)
             ORDER BY gr.name
             LIMIT $limit OFFSET $offset";
 
