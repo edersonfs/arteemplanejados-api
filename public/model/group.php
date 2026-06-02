@@ -127,8 +127,6 @@ class Group
     $stmt = $this->conn->prepare($query);
     $stmt->execute();
 
-    echo $query;
-
     $items = [];
 
     while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
