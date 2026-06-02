@@ -117,6 +117,8 @@ class Group {
 
         $stmt = $this->conn->prepare($query);
         $stmt->execute();
+
+        echo $query;
         
         $items = [];
 
