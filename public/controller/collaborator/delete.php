@@ -19,11 +19,11 @@ if (isset($_SERVER['HTTP_ORIGIN'])) {
 if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
 
   if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_METHOD']))
-      // may also be using PUT, PATCH, HEAD etc
-      header("Access-Control-Allow-Methods: GET, POST, OPTIONS, DELETE");         
+    // may also be using PUT, PATCH, HEAD etc
+    header("Access-Control-Allow-Methods: GET, POST, OPTIONS, DELETE");
 
   if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']))
-      header("Access-Control-Allow-Headers: {$_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']}");
+    header("Access-Control-Allow-Headers: {$_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']}");
 
   exit(0);
 }
@@ -46,36 +46,34 @@ $token = str_replace('Bearer ', '', $authorization);
 // include database and object files
 include_once '../../../app/database/Connection.php';
 include_once '../../model/collaborator.php';
- 
+
 // instantiate database and category object
 $conn = new Connection();
 $db = $conn->connect();
 
-try {        
-    $decoded = JWT::decode($token, new Key($_SERVER['KEY'], 'HS256'));
+try {
+  $decoded = JWT::decode($token, new Key($_SERVER['KEY'], 'HS256'));
 
-    // initialize object
-    $collaborator = new Collaborator($db);    
+  // initialize object
+  $collaborator = new Collaborator($db);
 
-    $id = filter_input(INPUT_GET, 'id', FILTER_DEFAULT);    
-    
-    // Set the ID property of the collaborator object
-    $collaborator->id = $id;
-    
-    // Check if the collaborator exists
-    if($collaborator->getById($id)) {
-        // Delete the collaborator
-        if($collaborator->delete($id)) {
-            echo json_encode(array("message" => "success"));
-        } else {
-            echo json_encode(array("message" => "error"));
-        }
+  $id = filter_input(INPUT_GET, 'id', FILTER_DEFAULT);
+
+  // Set the ID property of the collaborator object
+  $collaborator->id = $id;
+
+  // Check if the collaborator exists
+  if ($collaborator->getById($id)) {
+    // Delete the collaborator
+    if ($collaborator->delete($id)) {
+      echo json_encode(array("message" => "success"));
     } else {
-        echo json_encode(array("message" => "record_does_not_exist"));
+      echo json_encode(array("message" => "error"));
     }
+  } else {
+    echo json_encode(array("message" => "record_does_not_exist"));
+  }
 } catch (Throwable $e) {
-    http_response_code(401);
-    die('EXPIRED');
-} 
-
-?>
+  http_response_code(401);
+  die('EXPIRED');
+}

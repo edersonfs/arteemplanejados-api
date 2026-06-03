@@ -7,19 +7,19 @@ use Firebase\JWT\Key;
 use app\database\Connection;
 
 if (isset($_SERVER['HTTP_ORIGIN'])) {
-    header("Access-Control-Allow-Origin: {$_SERVER['HTTP_ORIGIN']}");
-    header('Access-Control-Allow-Credentials: true');
-    header('Access-Control-Max-Age: 86400');
+  header("Access-Control-Allow-Origin: {$_SERVER['HTTP_ORIGIN']}");
+  header('Access-Control-Allow-Credentials: true');
+  header('Access-Control-Max-Age: 86400');
 }
 
 if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
-    if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_METHOD']))
-        header("Access-Control-Allow-Methods: GET, POST, PUT, OPTIONS");
+  if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_METHOD']))
+    header("Access-Control-Allow-Methods: GET, POST, PUT, OPTIONS");
 
-    if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']))
-        header("Access-Control-Allow-Headers: {$_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']}");
+  if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']))
+    header("Access-Control-Allow-Headers: {$_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']}");
 
-    exit(0);
+  exit(0);
 }
 
 header("Access-Control-Allow-Origin: *");
@@ -40,41 +40,39 @@ $conn = new Connection();
 $db = $conn->connect();
 
 try {
-    $decoded = JWT::decode($token, new Key($_SERVER['KEY'], 'HS256'));
+  $decoded = JWT::decode($token, new Key($_SERVER['KEY'], 'HS256'));
 
-    $materialType = new MaterialType($db);
+  $materialType = new MaterialType($db);
 
-    $companyId = isset($_POST['company_id']) ? (int) $_POST['company_id'] : null;
+  $companyId = isset($_POST['company_id']) ? (int) $_POST['company_id'] : null;
 
-    if (empty($companyId)) {
-        echo json_encode(array("message" => "missing_company_id"));
-        exit;
-    }
+  if (empty($companyId)) {
+    echo json_encode(array("message" => "missing_company_id"));
+    exit;
+  }
 
-    $data = [
-        'company_id' => $companyId,
-        'name' => $_POST['name'] ?? null,
-        'created_user_id' => $_POST['created_user_id'] ?? null,
-        'created_date' => $_POST['created_date'] ?? null,
-        'updated_user_id' => $_POST['updated_user_id'] ?? null,
-        'updated_date' => $_POST['updated_date'] ?? null
-    ];
+  $data = [
+    'company_id' => $companyId,
+    'name' => $_POST['name'] ?? null,
+    'created_user_id' => $_POST['created_user_id'] ?? null,
+    'created_date' => $_POST['created_date'] ?? null,
+    'updated_user_id' => $_POST['updated_user_id'] ?? null,
+    'updated_date' => $_POST['updated_date'] ?? null
+  ];
 
-    if (!empty($data['name']) && $materialType->existsByName($data['name'], $companyId)) {
-        echo json_encode([
-            "message" => "record_already_exists"
-        ]);
-        exit;
-    }
+  if (!empty($data['name']) && $materialType->existsByName($data['name'], $companyId)) {
+    echo json_encode([
+      "message" => "record_already_exists"
+    ]);
+    exit;
+  }
 
-    if ($materialType->create($data)) {
-        echo json_encode(['material_type' => []]);
-    } else {
-        echo json_encode(array("message" => "error_creating_record"));
-    }
+  if ($materialType->create($data)) {
+    echo json_encode(['material_type' => []]);
+  } else {
+    echo json_encode(array("message" => "error_creating_record"));
+  }
 } catch (Throwable $e) {
-    http_response_code(401);
-    die('EXPIRED');
+  http_response_code(401);
+  die('EXPIRED');
 }
-
-?>

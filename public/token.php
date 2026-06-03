@@ -22,11 +22,11 @@ $prepare->execute([
 
 $userFound = $prepare->fetch();
 
-if(!$userFound) {  
+if (!$userFound) {
   http_response_code(401);
 }
 
-if(!password_verify($password, $userFound->password)) {
+if (!password_verify($password, $userFound->password)) {
   http_response_code(401);
 }
 
@@ -41,5 +41,3 @@ $payload = [
 $encode = JWT::encode($payload, $_ENV['KEY'], 'HS256');
 
 echo json_encode($encode);
-
-?>

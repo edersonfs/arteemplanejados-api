@@ -8,7 +8,7 @@ use app\database\Connection;
 
 // start cors
 
-if (isset($_SERVER['HTTP_ORIGIN'])) {  
+if (isset($_SERVER['HTTP_ORIGIN'])) {
   header("Access-Control-Allow-Origin: {$_SERVER['HTTP_ORIGIN']}");
   header('Access-Control-Allow-Credentials: true');
   header('Access-Control-Max-Age: 86400');    // cache for 1 day
@@ -17,13 +17,13 @@ if (isset($_SERVER['HTTP_ORIGIN'])) {
 // Access-Control headers are received during OPTIONS requests
 if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
 
-    if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_METHOD']))
-        header("Access-Control-Allow-Methods: GET, POST, PUT, OPTIONS");         
+  if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_METHOD']))
+    header("Access-Control-Allow-Methods: GET, POST, PUT, OPTIONS");
 
-    if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']))
-        header("Access-Control-Allow-Headers: {$_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']}");
+  if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']))
+    header("Access-Control-Allow-Headers: {$_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']}");
 
-    exit(0);
+  exit(0);
 }
 
 // end cors
@@ -50,47 +50,46 @@ $conn = new Connection();
 $db = $conn->connect();
 
 try {
-    $decoded = JWT::decode($token, new Key($_SERVER['KEY'], 'HS256'));
+  $decoded = JWT::decode($token, new Key($_SERVER['KEY'], 'HS256'));
 
-    $group_id = isset($decoded->group_id) ? (int) $decoded->group_id : null;    
+  $group_id = isset($decoded->group_id) ? (int) $decoded->group_id : null;
 
-    if ($group_id != 1) {
-      echo json_encode([
-          "message" => "permission_denied"
-      ]);
-      exit;
-    }
+  if ($group_id != 1) {
+    echo json_encode([
+      "message" => "permission_denied"
+    ]);
+    exit;
+  }
 
-    // initialize object
-    $group = new Group($db);
+  // initialize object
+  $group = new Group($db);
 
-    // Get ID parameter from PUT data
-    $putData = file_get_contents("php://input");
-    $data = json_decode($putData, true);  
+  // Get ID parameter from PUT data
+  $putData = file_get_contents("php://input");
+  $data = json_decode($putData, true);
 
-    $id = $data['id'] ?? null;
-    
-    if (!$id) {
-        http_response_code(400);
-        die('ID parameter is required');
-    }
+  $id = $data['id'] ?? null;
 
-    // Check if record already exists
-    if ($group->existsByNameWhenEdit($data['name'], $data['id'])) {
-        echo json_encode([
-          "message" => "record_already_exists"
-        ]);
-        exit;
-    }
-    
-    // Update record without image
-    if ($group->update($data)) {
-        echo json_encode(['group' => []]);
-    } else {
-        echo json_encode(['message' => 'error_updating_record']);
-    }
+  if (!$id) {
+    http_response_code(400);
+    die('ID parameter is required');
+  }
+
+  // Check if record already exists
+  if ($group->existsByNameWhenEdit($data['name'], $data['id'])) {
+    echo json_encode([
+      "message" => "record_already_exists"
+    ]);
+    exit;
+  }
+
+  // Update record without image
+  if ($group->update($data)) {
+    echo json_encode(['group' => []]);
+  } else {
+    echo json_encode(['message' => 'error_updating_record']);
+  }
 } catch (Throwable $e) {
-    http_response_code(401);
-    die('EXPIRED');
+  http_response_code(401);
+  die('EXPIRED');
 }
-?> 

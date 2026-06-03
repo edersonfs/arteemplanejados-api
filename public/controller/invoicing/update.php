@@ -7,19 +7,19 @@ use Firebase\JWT\Key;
 use app\database\Connection;
 
 if (isset($_SERVER['HTTP_ORIGIN'])) {
-    header("Access-Control-Allow-Origin: {$_SERVER['HTTP_ORIGIN']}");
-    header('Access-Control-Allow-Credentials: true');
-    header('Access-Control-Max-Age: 86400');
+  header("Access-Control-Allow-Origin: {$_SERVER['HTTP_ORIGIN']}");
+  header('Access-Control-Allow-Credentials: true');
+  header('Access-Control-Max-Age: 86400');
 }
 
 if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
-    if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_METHOD']))
-        header("Access-Control-Allow-Methods: GET, POST, PUT, OPTIONS");
+  if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_METHOD']))
+    header("Access-Control-Allow-Methods: GET, POST, PUT, OPTIONS");
 
-    if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']))
-        header("Access-Control-Allow-Headers: {$_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']}");
+  if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']))
+    header("Access-Control-Allow-Headers: {$_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']}");
 
-    exit(0);
+  exit(0);
 }
 
 header("Access-Control-Allow-Origin: *");
@@ -40,47 +40,45 @@ $conn = new Connection();
 $db = $conn->connect();
 
 try {
-    $decoded = JWT::decode($token, new Key($_SERVER['KEY'], 'HS256'));
+  $decoded = JWT::decode($token, new Key($_SERVER['KEY'], 'HS256'));
 
-    $invoicing = new Invoicing($db);
+  $invoicing = new Invoicing($db);
 
-    $oldRow = $invoicing->getById($_POST['id']);
-    if (!$oldRow) {
-        echo json_encode(array("message" => "record_does_not_exist"));
-        exit;
-    }
+  $oldRow = $invoicing->getById($_POST['id']);
+  if (!$oldRow) {
+    echo json_encode(array("message" => "record_does_not_exist"));
+    exit;
+  }
 
-    $companyId = isset($_POST['company_id']) ? (int) $_POST['company_id'] : (int) $oldRow['company_id'];
-    $month = isset($_POST['month']) ? (int) $_POST['month'] : (int) $oldRow['month'];
-    $year = isset($_POST['year']) ? (int) $_POST['year'] : (int) $oldRow['year'];
+  $companyId = isset($_POST['company_id']) ? (int) $_POST['company_id'] : (int) $oldRow['company_id'];
+  $month = isset($_POST['month']) ? (int) $_POST['month'] : (int) $oldRow['month'];
+  $year = isset($_POST['year']) ? (int) $_POST['year'] : (int) $oldRow['year'];
 
-    $data = [
-        'id' => $_POST['id'] ?? null,
-        'company_id' => $companyId,
-        'month' => $month,
-        'year' => $year,
-        'total_income' => $_POST['total_income'] ?? null,
-        'total_expense' => $_POST['total_expense'] ?? null,
-        'total_profit' => $_POST['total_profit'] ?? null,
-        'updated_user_id' => $_POST['updated_user_id'] ?? null,
-        'updated_date' => $_POST['updated_date'] ?? null
-    ];
+  $data = [
+    'id' => $_POST['id'] ?? null,
+    'company_id' => $companyId,
+    'month' => $month,
+    'year' => $year,
+    'total_income' => $_POST['total_income'] ?? null,
+    'total_expense' => $_POST['total_expense'] ?? null,
+    'total_profit' => $_POST['total_profit'] ?? null,
+    'updated_user_id' => $_POST['updated_user_id'] ?? null,
+    'updated_date' => $_POST['updated_date'] ?? null
+  ];
 
-    if ($invoicing->existsByMonthYearWhenEdit($month, $year, $data['id'], $companyId)) {
-        echo json_encode([
-            "message" => "record_already_exists"
-        ]);
-        exit;
-    }
+  if ($invoicing->existsByMonthYearWhenEdit($month, $year, $data['id'], $companyId)) {
+    echo json_encode([
+      "message" => "record_already_exists"
+    ]);
+    exit;
+  }
 
-    if ($invoicing->update($data)) {
-        echo json_encode(['invoicing' => []]);
-    } else {
-        echo json_encode(array("message" => "error_updating_record"));
-    }
+  if ($invoicing->update($data)) {
+    echo json_encode(['invoicing' => []]);
+  } else {
+    echo json_encode(array("message" => "error_updating_record"));
+  }
 } catch (Throwable $e) {
-    http_response_code(401);
-    die('EXPIRED');
+  http_response_code(401);
+  die('EXPIRED');
 }
-
-?>

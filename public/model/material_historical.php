@@ -1,71 +1,75 @@
 <?php
-class MaterialHistorical {
+class MaterialHistorical
+{
 
-    private $conn;
-    private $table_name = "material_historical";
+  private $conn;
+  private $table_name = "material_historical";
 
-    public $id;
-    public $material_id;
-    public $company_id;
-    public $supplier_id;
-    public $order_item_id;
-    public $explanation;
-    public $quantity;
-    public $unit_cost;
-    public $sales_price;
-    public $stock;
-    public $movement_type;
-    public $created_user_id;
-    public $created_date;
-    public $updated_user_id;
-    public $updated_date;
+  public $id;
+  public $material_id;
+  public $company_id;
+  public $supplier_id;
+  public $order_item_id;
+  public $explanation;
+  public $quantity;
+  public $unit_cost;
+  public $sales_price;
+  public $stock;
+  public $movement_type;
+  public $created_user_id;
+  public $created_date;
+  public $updated_user_id;
+  public $updated_date;
 
-    public function __construct($db) {
-        $this->conn = $db;
-    }
+  public function __construct($db)
+  {
+    $this->conn = $db;
+  }
 
-    public function create($data) {
-        $query = "INSERT INTO `" . $this->table_name . "`
+  public function create($data)
+  {
+    $query = "INSERT INTO `" . $this->table_name . "`
             (material_id, company_id, supplier_id, order_item_id, explanation, quantity, unit_cost, sales_price, stock,
             movement_type, created_user_id, created_date, updated_user_id, updated_date)
             VALUES
             (:material_id, :company_id, :supplier_id, :order_item_id, :explanation, :quantity, :unit_cost, :sales_price, :stock,
             :movement_type, :created_user_id, :created_date, :updated_user_id, :updated_date)";
 
-        $stmt = $this->conn->prepare($query);
+    $stmt = $this->conn->prepare($query);
 
-        $stmt->bindParam(':material_id', $data['material_id'], PDO::PARAM_INT);
-        $stmt->bindParam(':company_id', $data['company_id'], PDO::PARAM_INT);
-        $stmt->bindValue(
-            ':supplier_id',
-            $data['supplier_id'],
-            $data['supplier_id'] === null || $data['supplier_id'] === ''
-                ? PDO::PARAM_NULL
-                : PDO::PARAM_INT
-        );
-        $stmt->bindValue(
-            ':order_item_id',
-            $data['order_item_id'],
-            $data['order_item_id'] === null || $data['order_item_id'] === ''
-                ? PDO::PARAM_NULL
-                : PDO::PARAM_INT
-        );
-        $stmt->bindParam(':explanation', $data['explanation']);
-        $stmt->bindParam(':quantity', $data['quantity']);
-        $stmt->bindParam(':unit_cost', $data['unit_cost']);
-        $stmt->bindParam(':sales_price', $data['sales_price']);
-        $stmt->bindParam(':stock', $data['stock']);
-        $stmt->bindParam(':movement_type', $data['movement_type']);
-        $stmt->bindParam(':created_user_id', $data['created_user_id'], PDO::PARAM_INT);
-        $stmt->bindParam(':created_date', $data['created_date']);
-        $stmt->bindParam(':updated_user_id', $data['updated_user_id'], PDO::PARAM_INT);
-        $stmt->bindParam(':updated_date', $data['updated_date']);
+    $stmt->bindParam(':material_id', $data['material_id'], PDO::PARAM_INT);
+    $stmt->bindParam(':company_id', $data['company_id'], PDO::PARAM_INT);
+    $stmt->bindValue(
+      ':supplier_id',
+      $data['supplier_id'],
+      $data['supplier_id'] === null || $data['supplier_id'] === ''
+        ? PDO::PARAM_NULL
+        : PDO::PARAM_INT
+    );
+    $stmt->bindValue(
+      ':order_item_id',
+      $data['order_item_id'],
+      $data['order_item_id'] === null || $data['order_item_id'] === ''
+        ? PDO::PARAM_NULL
+        : PDO::PARAM_INT
+    );
+    $stmt->bindParam(':explanation', $data['explanation']);
+    $stmt->bindParam(':quantity', $data['quantity']);
+    $stmt->bindParam(':unit_cost', $data['unit_cost']);
+    $stmt->bindParam(':sales_price', $data['sales_price']);
+    $stmt->bindParam(':stock', $data['stock']);
+    $stmt->bindParam(':movement_type', $data['movement_type']);
+    $stmt->bindParam(':created_user_id', $data['created_user_id'], PDO::PARAM_INT);
+    $stmt->bindParam(':created_date', $data['created_date']);
+    $stmt->bindParam(':updated_user_id', $data['updated_user_id'], PDO::PARAM_INT);
+    $stmt->bindParam(':updated_date', $data['updated_date']);
 
-        return $stmt->execute();
-    }
+    return $stmt->execute();
+  }
 
-    public function update($data) {
-        $query = "UPDATE `" . $this->table_name . "`
+  public function update($data)
+  {
+    $query = "UPDATE `" . $this->table_name . "`
                 SET material_id = :material_id,
                     company_id = :company_id,
                     supplier_id = :supplier_id,
@@ -80,88 +84,91 @@ class MaterialHistorical {
                     updated_date = :updated_date
                 WHERE id = :id";
 
-        $stmt = $this->conn->prepare($query);
+    $stmt = $this->conn->prepare($query);
 
-        $stmt->bindParam(':material_id', $data['material_id'], PDO::PARAM_INT);
-        $stmt->bindParam(':company_id', $data['company_id'], PDO::PARAM_INT);
-        $stmt->bindValue(
-            ':supplier_id',
-            $data['supplier_id'],
-            $data['supplier_id'] === null || $data['supplier_id'] === ''
-                ? PDO::PARAM_NULL
-                : PDO::PARAM_INT
-        );
-        $stmt->bindValue(
-            ':order_item_id',
-            $data['order_item_id'],
-            $data['order_item_id'] === null || $data['order_item_id'] === ''
-                ? PDO::PARAM_NULL
-                : PDO::PARAM_INT
-        );
-        $stmt->bindParam(':explanation', $data['explanation']);
-        $stmt->bindParam(':quantity', $data['quantity']);
-        $stmt->bindParam(':unit_cost', $data['unit_cost']);
-        $stmt->bindParam(':sales_price', $data['sales_price']);
-        $stmt->bindParam(':stock', $data['stock']);
-        $stmt->bindParam(':movement_type', $data['movement_type']);
-        $stmt->bindParam(':updated_user_id', $data['updated_user_id'], PDO::PARAM_INT);
-        $stmt->bindParam(':updated_date', $data['updated_date']);
-        $stmt->bindParam(':id', $data['id'], PDO::PARAM_INT);
+    $stmt->bindParam(':material_id', $data['material_id'], PDO::PARAM_INT);
+    $stmt->bindParam(':company_id', $data['company_id'], PDO::PARAM_INT);
+    $stmt->bindValue(
+      ':supplier_id',
+      $data['supplier_id'],
+      $data['supplier_id'] === null || $data['supplier_id'] === ''
+        ? PDO::PARAM_NULL
+        : PDO::PARAM_INT
+    );
+    $stmt->bindValue(
+      ':order_item_id',
+      $data['order_item_id'],
+      $data['order_item_id'] === null || $data['order_item_id'] === ''
+        ? PDO::PARAM_NULL
+        : PDO::PARAM_INT
+    );
+    $stmt->bindParam(':explanation', $data['explanation']);
+    $stmt->bindParam(':quantity', $data['quantity']);
+    $stmt->bindParam(':unit_cost', $data['unit_cost']);
+    $stmt->bindParam(':sales_price', $data['sales_price']);
+    $stmt->bindParam(':stock', $data['stock']);
+    $stmt->bindParam(':movement_type', $data['movement_type']);
+    $stmt->bindParam(':updated_user_id', $data['updated_user_id'], PDO::PARAM_INT);
+    $stmt->bindParam(':updated_date', $data['updated_date']);
+    $stmt->bindParam(':id', $data['id'], PDO::PARAM_INT);
 
-        return $stmt->execute();
+    return $stmt->execute();
+  }
+
+  public function delete($id)
+  {
+    $query = "DELETE FROM `" . $this->table_name . "` WHERE id = :id";
+
+    $stmt = $this->conn->prepare($query);
+    $stmt->bindParam(":id", $id, PDO::PARAM_INT);
+
+    if ($stmt->execute()) {
+      return $stmt->rowCount() > 0;
     }
 
-    public function delete($id) {
-        $query = "DELETE FROM `" . $this->table_name . "` WHERE id = :id";
+    return false;
+  }
 
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(":id", $id, PDO::PARAM_INT);
-
-        if ($stmt->execute()) {
-            return $stmt->rowCount() > 0;
-        }
-
-        return false;
-    }
-
-    /**
-     * Prefer the CREATE snapshot row so material updates stay mirrored to cadastro history;
-     * otherwise use the newest row so later movement entries are not rewritten in bulk.
-     */
-    public function findSnapshotRowForMaterialSync($material_id) {
-        $stmt = $this->conn->prepare(
-            "SELECT id, material_id, order_item_id, movement_type
+  /**
+   * Prefer the CREATE snapshot row so material updates stay mirrored to cadastro history;
+   * otherwise use the newest row so later movement entries are not rewritten in bulk.
+   */
+  public function findSnapshotRowForMaterialSync($material_id)
+  {
+    $stmt = $this->conn->prepare(
+      "SELECT id, material_id, order_item_id, movement_type
              FROM `" . $this->table_name . "`
              WHERE material_id = :material_id AND movement_type = :create_type
              ORDER BY id DESC
              LIMIT 1"
-        );
-        $stmt->execute([
-            'material_id' => $material_id,
-            'create_type' => 'CREATE',
-        ]);
+    );
+    $stmt->execute([
+      'material_id' => $material_id,
+      'create_type' => 'CREATE',
+    ]);
 
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
-        if ($row) {
-            return $row;
-        }
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+    if ($row) {
+      return $row;
+    }
 
-        $stmt = $this->conn->prepare(
-            "SELECT id, material_id, order_item_id, movement_type
+    $stmt = $this->conn->prepare(
+      "SELECT id, material_id, order_item_id, movement_type
              FROM `" . $this->table_name . "`
              WHERE material_id = :material_id
              ORDER BY created_date DESC, id DESC
              LIMIT 1"
-        );
-        $stmt->execute(['material_id' => $material_id]);
+    );
+    $stmt->execute(['material_id' => $material_id]);
 
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        return $row ?: null;
-    }
+    return $row ?: null;
+  }
 
-    private function selectColumnsSql(): string {
-        return "
+  private function selectColumnsSql(): string
+  {
+    return "
                 mh.id as id,
                 mh.material_id as material_id,
                 mat.name as material_name,
@@ -185,70 +192,75 @@ class MaterialHistorical {
                 mh.updated_date as updated_date,
                 upus.name as updated_user_name,
                 mat.image_file as image_file";
-    }
+  }
 
-    private function fromJoinSql(): string {
-        return "
+  private function fromJoinSql(): string
+  {
+    return "
             FROM
                 `" . $this->table_name . "` mh
                 inner join `material` mat on mh.material_id = mat.id
                 inner join `company` cmp on mh.company_id = cmp.id
                 left join `supplier` sup on mh.supplier_id = sup.id
                 left join `order_item` oi on mh.order_item_id = oi.id
-                left join `order` ord on oi.order_id = ord.id	
+                left join `order` ord on oi.order_id = ord.id
                 inner join `user` upus on mh.updated_user_id = upus.id
                 inner join `user` crus on mh.created_user_id = crus.id";
-    }
+  }
 
-    public function getAll($company_id, $material_id = null) {
-        $query = "SELECT " . $this->selectColumnsSql() . $this->fromJoinSql() . "
+  public function getAll($company_id, $material_id = null)
+  {
+    $query = "SELECT " . $this->selectColumnsSql() . $this->fromJoinSql() . "
             WHERE (mh.company_id = :company_id)
             AND (mat.id = :material_id OR :material_id = 0)
             ORDER BY mh.created_date DESC";
 
-        $stmt = $this->conn->prepare($query);
-        $stmt->execute(['company_id' => $company_id, 'material_id' => $material_id ?? 0]);
+    $stmt = $this->conn->prepare($query);
+    $stmt->execute(['company_id' => $company_id, 'material_id' => $material_id ?? 0]);
 
-        $items = [];
+    $items = [];
 
-        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            $items[] = $row;
-        }
-
-        return $items;
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+      $items[] = $row;
     }
 
-    public function getPagination($limit, $offset, $company_id, $material_id = null) {
-        $query = "SELECT " . $this->selectColumnsSql() . $this->fromJoinSql() . "
+    return $items;
+  }
+
+  public function getPagination($limit, $offset, $company_id, $material_id = null)
+  {
+    $query = "SELECT " . $this->selectColumnsSql() . $this->fromJoinSql() . "
             WHERE (mh.company_id = :company_id)
             AND (mat.id = :material_id OR :material_id = 0)
             ORDER BY mh.created_date DESC
             LIMIT $limit OFFSET $offset";
 
-        $stmt = $this->conn->prepare($query);
-        $stmt->execute(['company_id' => $company_id, 'material_id' => $material_id ?? 0]);
+    $stmt = $this->conn->prepare($query);
+    $stmt->execute(['company_id' => $company_id, 'material_id' => $material_id ?? 0]);
 
-        $items = [];
+    $items = [];
 
-        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            $items[] = $row;
-        }
-
-        return $items;
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+      $items[] = $row;
     }
 
-    public function getById($id) {
-        $query = "SELECT " . $this->selectColumnsSql() . $this->fromJoinSql() . "
+    return $items;
+  }
+
+  public function getById($id)
+  {
+    $query = "SELECT " . $this->selectColumnsSql() . $this->fromJoinSql() . "
             WHERE mh.id = :id";
 
-        $stmt = $this->conn->prepare($query);
-        $stmt->execute(['id' => $id]);
+    $stmt = $this->conn->prepare($query);
+    $stmt->execute(['id' => $id]);
 
-        return $stmt->fetch(PDO::FETCH_ASSOC);
-    }
+    return $stmt->fetch(PDO::FETCH_ASSOC);
+  }
 
-    public function search($search, $limit, $offset, $company_id) {
-        $query = "
+  public function search($search, $limit, $offset, $company_id)
+  {
+    $query = "
             SELECT " . $this->selectColumnsSql() . $this->fromJoinSql() . "
             WHERE
                 (mh.company_id = :company_id)
@@ -267,18 +279,17 @@ class MaterialHistorical {
             ORDER BY mh.created_date DESC
             LIMIT $limit OFFSET $offset";
 
-        $stmt = $this->conn->prepare($query);
-        $stmt->execute([
-            'company_id' => $company_id,
-        ]);
+    $stmt = $this->conn->prepare($query);
+    $stmt->execute([
+      'company_id' => $company_id,
+    ]);
 
-        $items = [];
+    $items = [];
 
-        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            $items[] = $row;
-        }
-
-        return $items;
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+      $items[] = $row;
     }
+
+    return $items;
+  }
 }
-?>

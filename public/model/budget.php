@@ -1,63 +1,67 @@
 <?php
-class Budget {
+class Budget
+{
 
-    private $conn;
-    private $table_name = "budget";
+  private $conn;
+  private $table_name = "budget";
 
-    public $id;
-    public $company_id;
-    public $internal_client_id;
-    public $number;
-    public $status;
-    public $cost;
-    public $sale;
-    public $profit;
-    public $image_file;
-    public $image_path;
-    public $created_user_id;
-    public $created_date;
-    public $updated_user_id;
-    public $updated_date;
+  public $id;
+  public $company_id;
+  public $internal_client_id;
+  public $number;
+  public $status;
+  public $cost;
+  public $sale;
+  public $profit;
+  public $image_file;
+  public $image_path;
+  public $created_user_id;
+  public $created_date;
+  public $updated_user_id;
+  public $updated_date;
 
-    public function __construct($db) {
-        $this->conn = $db;
-    }
+  public function __construct($db)
+  {
+    $this->conn = $db;
+  }
 
-    public function create($data) {
-        $query = "INSERT INTO `" . $this->table_name . "`
+  public function create($data)
+  {
+    $query = "INSERT INTO `" . $this->table_name . "`
             (company_id, internal_client_id, `number`, status, cost, sale, profit,
             image_file, image_path, created_user_id, created_date, updated_user_id, updated_date)
             VALUES
             (:company_id, :internal_client_id, :number, :status, :cost, :sale, :profit,
             :image_file, :image_path, :created_user_id, :created_date, :updated_user_id, :updated_date)";
 
-        $stmt = $this->conn->prepare($query);
+    $stmt = $this->conn->prepare($query);
 
-        $stmt->bindParam(':company_id', $data['company_id'], PDO::PARAM_INT);
-        $stmt->bindValue(
-            ':internal_client_id',
-            $data['internal_client_id'],
-            $data['internal_client_id'] === null || $data['internal_client_id'] === ''
-                ? PDO::PARAM_NULL
-                : PDO::PARAM_INT
-        );
-        $stmt->bindParam(':number', $data['number']);
-        $stmt->bindParam(':status', $data['status']);
-        $stmt->bindParam(':cost', $data['cost']);
-        $stmt->bindParam(':sale', $data['sale']);
-        $stmt->bindParam(':profit', $data['profit']);
-        $stmt->bindParam(':image_file', $data['image_file']);
-        $stmt->bindParam(':image_path', $data['image_path']);
-        $stmt->bindParam(':created_user_id', $data['created_user_id'], PDO::PARAM_INT);
-        $stmt->bindParam(':created_date', $data['created_date']);
-        $stmt->bindParam(':updated_user_id', $data['updated_user_id'], PDO::PARAM_INT);
-        $stmt->bindParam(':updated_date', $data['updated_date']);
+    $stmt->bindParam(':company_id', $data['company_id'], PDO::PARAM_INT);
+    $stmt->bindValue(
+      ':internal_client_id',
+      $data['internal_client_id'],
+      $data['internal_client_id'] === null || $data['internal_client_id'] === ''
+        ? PDO::PARAM_NULL
+        : PDO::PARAM_INT
+    );
+    $stmt->bindParam(':number', $data['number']);
+    $stmt->bindParam(':status', $data['status']);
+    $stmt->bindParam(':cost', $data['cost']);
+    $stmt->bindParam(':sale', $data['sale']);
+    $stmt->bindParam(':profit', $data['profit']);
+    $stmt->bindParam(':image_file', $data['image_file']);
+    $stmt->bindParam(':image_path', $data['image_path']);
+    $stmt->bindParam(':created_user_id', $data['created_user_id'], PDO::PARAM_INT);
+    $stmt->bindParam(':created_date', $data['created_date']);
+    $stmt->bindParam(':updated_user_id', $data['updated_user_id'], PDO::PARAM_INT);
+    $stmt->bindParam(':updated_date', $data['updated_date']);
 
-        return $stmt->execute();
-    }
+    return $stmt->execute();
+  }
 
-    public function update($data) {
-        $query = "UPDATE `" . $this->table_name . "`
+  public function update($data)
+  {
+    $query = "UPDATE `" . $this->table_name . "`
                 SET company_id = :company_id,
                     internal_client_id = :internal_client_id,
                     `number` = :number,
@@ -71,45 +75,47 @@ class Budget {
                     updated_date = :updated_date
                 WHERE id = :id";
 
-        $stmt = $this->conn->prepare($query);
+    $stmt = $this->conn->prepare($query);
 
-        $stmt->bindParam(':company_id', $data['company_id'], PDO::PARAM_INT);
-        $stmt->bindValue(
-            ':internal_client_id',
-            $data['internal_client_id'],
-            $data['internal_client_id'] === null || $data['internal_client_id'] === ''
-                ? PDO::PARAM_NULL
-                : PDO::PARAM_INT
-        );
-        $stmt->bindParam(':number', $data['number']);
-        $stmt->bindParam(':status', $data['status']);
-        $stmt->bindParam(':cost', $data['cost']);
-        $stmt->bindParam(':sale', $data['sale']);
-        $stmt->bindParam(':profit', $data['profit']);
-        $stmt->bindParam(':image_file', $data['image_file']);
-        $stmt->bindParam(':image_path', $data['image_path']);
-        $stmt->bindParam(':updated_user_id', $data['updated_user_id'], PDO::PARAM_INT);
-        $stmt->bindParam(':updated_date', $data['updated_date']);
-        $stmt->bindParam(':id', $data['id'], PDO::PARAM_INT);
+    $stmt->bindParam(':company_id', $data['company_id'], PDO::PARAM_INT);
+    $stmt->bindValue(
+      ':internal_client_id',
+      $data['internal_client_id'],
+      $data['internal_client_id'] === null || $data['internal_client_id'] === ''
+        ? PDO::PARAM_NULL
+        : PDO::PARAM_INT
+    );
+    $stmt->bindParam(':number', $data['number']);
+    $stmt->bindParam(':status', $data['status']);
+    $stmt->bindParam(':cost', $data['cost']);
+    $stmt->bindParam(':sale', $data['sale']);
+    $stmt->bindParam(':profit', $data['profit']);
+    $stmt->bindParam(':image_file', $data['image_file']);
+    $stmt->bindParam(':image_path', $data['image_path']);
+    $stmt->bindParam(':updated_user_id', $data['updated_user_id'], PDO::PARAM_INT);
+    $stmt->bindParam(':updated_date', $data['updated_date']);
+    $stmt->bindParam(':id', $data['id'], PDO::PARAM_INT);
 
-        return $stmt->execute();
+    return $stmt->execute();
+  }
+
+  public function delete($id)
+  {
+    $query = "DELETE FROM `" . $this->table_name . "` WHERE id = :id";
+
+    $stmt = $this->conn->prepare($query);
+    $stmt->bindParam(":id", $id, PDO::PARAM_INT);
+
+    if ($stmt->execute()) {
+      return $stmt->rowCount() > 0;
     }
 
-    public function delete($id) {
-        $query = "DELETE FROM `" . $this->table_name . "` WHERE id = :id";
+    return false;
+  }
 
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(":id", $id, PDO::PARAM_INT);
-
-        if ($stmt->execute()) {
-            return $stmt->rowCount() > 0;
-        }
-
-        return false;
-    }
-
-    private function selectColumnsSql(): string {
-        return "
+  private function selectColumnsSql(): string
+  {
+    return "
                 bud.id as id,
                 bud.company_id as company_id,
                 cmp.name as company_name,
@@ -128,73 +134,79 @@ class Budget {
                 bud.updated_user_id as updated_user_id,
                 bud.updated_date as updated_date,
                 upus.name as updated_user_name";
-    }
+  }
 
-    private function fromJoinSql(): string {
-        return "
+  private function fromJoinSql(): string
+  {
+    return "
             FROM
                 `" . $this->table_name . "` bud
                 inner join `company` cmp on bud.company_id = cmp.id
                 left join `internal_client` ic on bud.internal_client_id = ic.id
                 inner join `user` upus on bud.updated_user_id = upus.id
                 inner join `user` crus on bud.created_user_id = crus.id";
-    }
+  }
 
-    public function getAll($group_id, $company_id, $internal_client_id) {
-        $query = "SELECT " . $this->selectColumnsSql() . $this->fromJoinSql() . "
+  public function getAll($group_id, $company_id, $internal_client_id)
+  {
+    $query = "SELECT " . $this->selectColumnsSql() . $this->fromJoinSql() . "
             WHERE (bud.company_id = :company_id OR :group_id = 1)
             AND (bud.internal_client_id = :internal_client_id OR :internal_client_id = 0)
             ORDER BY bud.`number`, bud.created_date DESC";
 
-        $stmt = $this->conn->prepare($query);
-        $stmt->execute([
-            'group_id' => $group_id,
-            'company_id' => $company_id,
-            'internal_client_id' => $internal_client_id,
-        ]);
+    $stmt = $this->conn->prepare($query);
+    $stmt->execute([
+      'group_id' => $group_id,
+      'company_id' => $company_id,
+      'internal_client_id' => $internal_client_id,
+    ]);
 
-        $items = [];
+    $items = [];
 
-        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            $items[] = $row;
-        }
-
-        return $items;
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+      $items[] = $row;
     }
 
-    public function getPagination($limit, $offset, $group_id, $company_id, $internal_client_id) {
-        $query = "SELECT " . $this->selectColumnsSql() . $this->fromJoinSql() . "
+    return $items;
+  }
+
+  public function getPagination($limit, $offset, $group_id, $company_id, $internal_client_id)
+  {
+    $query = "SELECT " . $this->selectColumnsSql() . $this->fromJoinSql() . "
             WHERE (bud.company_id = :company_id OR :group_id = 1) AND (bud.internal_client_id = :internal_client_id OR :internal_client_id = 0)
             ORDER BY bud.created_date DESC
             LIMIT $limit OFFSET $offset";
 
-        $stmt = $this->conn->prepare($query);
-        $stmt->execute(['group_id' => $group_id, 'company_id' => $company_id, 'internal_client_id' => $internal_client_id]);
+    $stmt = $this->conn->prepare($query);
+    $stmt->execute(['group_id' => $group_id, 'company_id' => $company_id, 'internal_client_id' => $internal_client_id]);
 
-        $items = [];
+    $items = [];
 
-        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            $items[] = $row;
-        }
-
-        return $items;
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+      $items[] = $row;
     }
 
-    public function getById($id) {
-        $query = "SELECT " . $this->selectColumnsSql() . $this->fromJoinSql() . "
+    return $items;
+  }
+
+  public function getById($id)
+  {
+    $query = "SELECT " . $this->selectColumnsSql() . $this->fromJoinSql() . "
             WHERE bud.id = :id";
 
-        $stmt = $this->conn->prepare($query);
-        $stmt->execute(['id' => $id]);
+    $stmt = $this->conn->prepare($query);
+    $stmt->execute(['id' => $id]);
 
-        return $stmt->fetch(PDO::FETCH_ASSOC);
-    }
+    return $stmt->fetch(PDO::FETCH_ASSOC);
+  }
 
-    public function search($search, $limit, $offset, $group_id, $company_id) {
-        $query = "
+  public function search($search, $limit, $offset, $group_id, $company_id, $internal_client_id)
+  {
+    $query = "
             SELECT " . $this->selectColumnsSql() . $this->fromJoinSql() . "
             WHERE
                 (bud.company_id = :company_id OR :group_id = 1)
+                AND (bud.internal_client_id = :internal_client_id OR :internal_client_id = 0)
                 AND (
                     LOWER(IFNULL(bud.`number`, '')) LIKE LOWER('%$search%')
                     OR LOWER(IFNULL(bud.status, '')) LIKE LOWER('%$search%')
@@ -207,44 +219,46 @@ class Budget {
             ORDER BY bud.created_date DESC
             LIMIT $limit OFFSET $offset";
 
-        $stmt = $this->conn->prepare($query);
-        $stmt->execute([
-            'group_id' => $group_id,
-            'company_id' => $company_id,
-        ]);
+    $stmt = $this->conn->prepare($query);
+    $stmt->execute([
+      'group_id' => $group_id,
+      'company_id' => $company_id,
+      'internal_client_id' => $internal_client_id,
+    ]);
 
-        $items = [];
+    $items = [];
 
-        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            $items[] = $row;
-        }
-
-        return $items;
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+      $items[] = $row;
     }
 
-    public function existsByNumber($number, $company_id) {
-        $query = "SELECT * FROM `" . $this->table_name . "` WHERE `number` = :number AND company_id = :company_id";
+    return $items;
+  }
 
-        $stmt = $this->conn->prepare($query);
-        $stmt->execute([
-            'number' => $number,
-            'company_id' => $company_id,
-        ]);
+  public function existsByNumber($number, $company_id)
+  {
+    $query = "SELECT * FROM `" . $this->table_name . "` WHERE `number` = :number AND company_id = :company_id";
 
-        return $stmt->rowCount() > 0;
-    }
+    $stmt = $this->conn->prepare($query);
+    $stmt->execute([
+      'number' => $number,
+      'company_id' => $company_id,
+    ]);
 
-    public function existsByNumberWhenEdit($number, $id, $company_id) {
-        $query = "SELECT * FROM `" . $this->table_name . "` WHERE `number` = :number AND company_id = :company_id AND id <> :id";
+    return $stmt->rowCount() > 0;
+  }
 
-        $stmt = $this->conn->prepare($query);
-        $stmt->execute([
-            'number' => $number,
-            'company_id' => $company_id,
-            'id' => $id,
-        ]);
+  public function existsByNumberWhenEdit($number, $id, $company_id)
+  {
+    $query = "SELECT * FROM `" . $this->table_name . "` WHERE `number` = :number AND company_id = :company_id AND id <> :id";
 
-        return $stmt->rowCount() > 0;
-    }
+    $stmt = $this->conn->prepare($query);
+    $stmt->execute([
+      'number' => $number,
+      'company_id' => $company_id,
+      'id' => $id,
+    ]);
+
+    return $stmt->rowCount() > 0;
+  }
 }
-?>

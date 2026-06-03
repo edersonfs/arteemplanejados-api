@@ -1,60 +1,64 @@
 <?php
-class User {
- 
-    // database connection and table name
-    private $conn;
-    private $table_name = "user";
- 
-    // object properties
-    public $id;
-    public $group_id;
-    public $name;
-    public $email;
-    public $password;
-    public $active;
-    public $image_file;
-    public $image_path;
-    public $created_user_id;
-    public $created_date;
-    public $updated_user_id;
-    public $updated_date;
- 
-    public function __construct($db){
-        $this->conn = $db;
-    }
+class User
+{
 
-    //ACTIONS
+  // database connection and table name
+  private $conn;
+  private $table_name = "user";
 
-    public function create($data) {       
-        $query = "INSERT INTO `" . $this->table_name . "`
+  // object properties
+  public $id;
+  public $group_id;
+  public $name;
+  public $email;
+  public $password;
+  public $active;
+  public $image_file;
+  public $image_path;
+  public $created_user_id;
+  public $created_date;
+  public $updated_user_id;
+  public $updated_date;
+
+  public function __construct($db)
+  {
+    $this->conn = $db;
+  }
+
+  //ACTIONS
+
+  public function create($data)
+  {
+    $query = "INSERT INTO `" . $this->table_name . "`
             (group_id, company_id, name, email, password, active, image_file, image_path, created_user_id, created_date, updated_user_id, updated_date)
             VALUES
             (:group_id, :company_id, :name, :email, :password, :active, :image_file, :image_path, :created_user_id, :created_date, :updated_user_id, :updated_date)";
 
-        $stmt = $this->conn->prepare($query);
+    $stmt = $this->conn->prepare($query);
 
-        $stmt->bindParam(':group_id', $data['group_id'], PDO::PARAM_INT);
-        $stmt->bindParam(':company_id', $data['company_id'], PDO::PARAM_INT);
-        $stmt->bindParam(':name', $data['name']);
-        $stmt->bindParam(':email', $data['email']);
-        $stmt->bindParam(':password', $data['password']);
-        $stmt->bindParam(':active', $data['active'], PDO::PARAM_INT); // 👈 force integer (0 or 1)
-        $stmt->bindParam(':image_file', $data['image_file']);
-        $stmt->bindParam(':image_path', $data['image_path']);
-        $stmt->bindParam(':created_user_id', $data['created_user_id'], PDO::PARAM_INT);
-        $stmt->bindParam(':created_date', $data['created_date']);
-        $stmt->bindParam(':updated_user_id', $data['updated_user_id'], PDO::PARAM_INT);
-        $stmt->bindParam(':updated_date', $data['updated_date']);
+    $stmt->bindParam(':group_id', $data['group_id'], PDO::PARAM_INT);
+    $stmt->bindParam(':company_id', $data['company_id'], PDO::PARAM_INT);
+    $stmt->bindParam(':name', $data['name']);
+    $stmt->bindParam(':email', $data['email']);
+    $stmt->bindParam(':password', $data['password']);
+    $stmt->bindParam(':active', $data['active'], PDO::PARAM_INT); // 👈 force integer (0 or 1)
+    $stmt->bindParam(':image_file', $data['image_file']);
+    $stmt->bindParam(':image_path', $data['image_path']);
+    $stmt->bindParam(':created_user_id', $data['created_user_id'], PDO::PARAM_INT);
+    $stmt->bindParam(':created_date', $data['created_date']);
+    $stmt->bindParam(':updated_user_id', $data['updated_user_id'], PDO::PARAM_INT);
+    $stmt->bindParam(':updated_date', $data['updated_date']);
 
-        return $stmt->execute();
-    }
+    return $stmt->execute();
+  }
 
-    public function update($data) {       
-        $query = "UPDATE `" . $this->table_name . "`
+  public function update($data)
+  {
+    $query = "UPDATE `" . $this->table_name . "`
                 SET group_id = :group_id,
                     company_id = :company_id,
                     name = :name,
-                    email = :email,                    
+                    email = :email,
                     active = :active,
                     image_file = :image_file,
                     image_path = :image_path,
@@ -62,214 +66,220 @@ class User {
                     updated_date = :updated_date
                 WHERE id = :id";
 
-        $stmt = $this->conn->prepare($query);
+    $stmt = $this->conn->prepare($query);
 
-        $stmt->bindParam(':group_id', $data['group_id'], PDO::PARAM_INT);
-        $stmt->bindParam(':company_id', $data['company_id'], PDO::PARAM_INT);
-        $stmt->bindParam(':name', $data['name']);
-        $stmt->bindParam(':email', $data['email']);
-        $stmt->bindParam(':active', $data['active'], PDO::PARAM_INT);
-        $stmt->bindParam(':image_file', $data['image_file']);
-        $stmt->bindParam(':image_path', $data['image_path']);
-        $stmt->bindParam(':updated_user_id', $data['updated_user_id'], PDO::PARAM_INT);
-        $stmt->bindParam(':updated_date', $data['updated_date']);
-        $stmt->bindParam(':id', $data['id'], PDO::PARAM_INT); // 👈 bind ID for WHERE
+    $stmt->bindParam(':group_id', $data['group_id'], PDO::PARAM_INT);
+    $stmt->bindParam(':company_id', $data['company_id'], PDO::PARAM_INT);
+    $stmt->bindParam(':name', $data['name']);
+    $stmt->bindParam(':email', $data['email']);
+    $stmt->bindParam(':active', $data['active'], PDO::PARAM_INT);
+    $stmt->bindParam(':image_file', $data['image_file']);
+    $stmt->bindParam(':image_path', $data['image_path']);
+    $stmt->bindParam(':updated_user_id', $data['updated_user_id'], PDO::PARAM_INT);
+    $stmt->bindParam(':updated_date', $data['updated_date']);
+    $stmt->bindParam(':id', $data['id'], PDO::PARAM_INT); // 👈 bind ID for WHERE
 
-        return $stmt->execute();
+    return $stmt->execute();
+  }
+
+  public function delete($id)
+  {
+    $query = "DELETE FROM `" . $this->table_name . "` WHERE id = :id";
+
+    $stmt = $this->conn->prepare($query);
+    $stmt->bindParam(":id", $id, PDO::PARAM_INT);
+
+    // Execute the query
+    if ($stmt->execute()) {
+      // Check how many rows were deleted
+      return $stmt->rowCount() > 0;
     }
 
-    public function delete($id) {
-        $query = "DELETE FROM `" . $this->table_name . "` WHERE id = :id";
+    return false;
+  }
 
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(":id", $id, PDO::PARAM_INT);
+  //GET
 
-        // Execute the query
-        if ($stmt->execute()) {
-            // Check how many rows were deleted
-            return $stmt->rowCount() > 0;
-        }
-
-        return false;
-    }
-
-    //GET
-
-    public function getAll($company_id, $group_id) {    
-        $query = "
-            SELECT 
-                us.id as id, 
+  public function getAll($company_id, $group_id)
+  {
+    $query = "
+            SELECT
+                us.id as id,
                 gr.id as group_id,
                 gr.name as group_name,
                 co.id as company_id,
                 co.name as company_name,
-                us.name as name, 
-                us.email as email, 
-                us.active as active, 
+                us.name as name,
+                us.email as email,
+                us.active as active,
                 us.image_file as image_file,
                 us.image_path as image_path,
-                us.created_user_id as created_user_id, 
-                us.created_date as created_date, 
+                us.created_user_id as created_user_id,
+                us.created_date as created_date,
                 crus.name as created_user_name,
-                us.updated_user_id as updated_user_id, 
-                us.updated_date as updated_date, 
-                upus.name as updated_user_name 
-            FROM 
-                `" . $this->table_name . "` us 
-                inner join `group` gr on us.group_id = gr.id
-                inner join `company` co on us.company_id = co.id
-                inner join `user` upus on us.updated_user_id = upus.id 
-                inner join `user` crus on us.created_user_id = crus.id
-            WHERE us.company_id = :company_id or :group_id = 1
-            ORDER BY us.name";  
-
-        $stmt = $this->conn->prepare( $query );
-        $stmt->execute(['company_id' => $company_id, 'group_id' => $group_id]);
-    
-        $users = [];
-
-        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            $users[] = $row;
-        }
-
-        return $users;
-    }
-
-    public function getPagination($limit, $offset, $company_id, $group_id) {
-        $query = "
-             SELECT 
-                us.id as id, 
-                gr.id as group_id,
-                gr.name as group_name,
-                co.id as company_id,
-                co.name as company_name,
-                us.name as name, 
-                us.email as email, 
-                us.active as active, 
-                us.image_file as image_file,
-                us.image_path as image_path,
-                us.created_user_id as created_user_id, 
-                us.created_date as created_date, 
-                crus.name as created_user_name,
-                us.updated_user_id as updated_user_id, 
-                us.updated_date as updated_date, 
-                upus.name as updated_user_name 
-            FROM 
+                us.updated_user_id as updated_user_id,
+                us.updated_date as updated_date,
+                upus.name as updated_user_name
+            FROM
                 `" . $this->table_name . "` us
                 inner join `group` gr on us.group_id = gr.id
                 inner join `company` co on us.company_id = co.id
-                inner join `user` upus on us.updated_user_id = upus.id 
+                inner join `user` upus on us.updated_user_id = upus.id
+                inner join `user` crus on us.created_user_id = crus.id
+            WHERE us.company_id = :company_id or :group_id = 1
+            ORDER BY us.name";
+
+    $stmt = $this->conn->prepare($query);
+    $stmt->execute(['company_id' => $company_id, 'group_id' => $group_id]);
+
+    $users = [];
+
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+      $users[] = $row;
+    }
+
+    return $users;
+  }
+
+  public function getPagination($limit, $offset, $company_id, $group_id)
+  {
+    $query = "
+             SELECT
+                us.id as id,
+                gr.id as group_id,
+                gr.name as group_name,
+                co.id as company_id,
+                co.name as company_name,
+                us.name as name,
+                us.email as email,
+                us.active as active,
+                us.image_file as image_file,
+                us.image_path as image_path,
+                us.created_user_id as created_user_id,
+                us.created_date as created_date,
+                crus.name as created_user_name,
+                us.updated_user_id as updated_user_id,
+                us.updated_date as updated_date,
+                upus.name as updated_user_name
+            FROM
+                `" . $this->table_name . "` us
+                inner join `group` gr on us.group_id = gr.id
+                inner join `company` co on us.company_id = co.id
+                inner join `user` upus on us.updated_user_id = upus.id
                 inner join `user` crus on us.created_user_id = crus.id
             WHERE us.company_id = :company_id or :group_id = 1
             ORDER BY us.created_date DESC
             LIMIT $limit OFFSET $offset";
 
-        $stmt = $this->conn->prepare($query);
-        $stmt->execute(['company_id' => $company_id, 'group_id' => $group_id]);
-        
-        $items = [];
+    $stmt = $this->conn->prepare($query);
+    $stmt->execute(['company_id' => $company_id, 'group_id' => $group_id]);
 
-        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            $items[] = $row;
-        }
-        
-        return $items;
+    $items = [];
+
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+      $items[] = $row;
     }
 
-    public function getById($id, $group_id, $company_id) {    
-        $query = "
-            SELECT 
-              us.id as id, 
+    return $items;
+  }
+
+  public function getById($id, $group_id, $company_id)
+  {
+    $query = "
+            SELECT
+              us.id as id,
               gr.id as group_id,
-              co.id as company_id,                
-              us.name as name, 
-              us.email as email, 
-              us.active as active, 
+              co.id as company_id,
+              us.name as name,
+              us.email as email,
+              us.active as active,
               us.image_file as image_file,
               us.image_path as image_path,
-              us.created_user_id as created_user_id, 
-              us.created_date as created_date, 
+              us.created_user_id as created_user_id,
+              us.created_date as created_date,
               crus.name as created_user_name,
-              us.updated_user_id as updated_user_id, 
-              us.updated_date as updated_date, 
-              upus.name as updated_user_name 
-            FROM 
-              `" . $this->table_name . "` us 
+              us.updated_user_id as updated_user_id,
+              us.updated_date as updated_date,
+              upus.name as updated_user_name
+            FROM
+              `" . $this->table_name . "` us
               inner join `group` gr on us.group_id = gr.id
               inner join `company` co on us.company_id = co.id
-              inner join `user` upus on us.updated_user_id = upus.id 
+              inner join `user` upus on us.updated_user_id = upus.id
               inner join `user` crus on us.created_user_id = crus.id
-            WHERE 
-              us.id = :id 
-            and (us.company_id = :company_id or :group_id = 1)";    
+            WHERE
+              us.id = :id
+            and (us.company_id = :company_id or :group_id = 1)";
 
-        $stmt = $this->conn->prepare( $query );
-        $stmt->execute(['id' => $id, 'group_id' => $group_id, 'company_id' => $company_id]);
-    
-        return $stmt->fetch(PDO::FETCH_ASSOC);
-    }
+    $stmt = $this->conn->prepare($query);
+    $stmt->execute(['id' => $id, 'group_id' => $group_id, 'company_id' => $company_id]);
 
-    public function search($search, $limit, $offset, $group_id, $company_id) {
-        $query = "
-            SELECT 
-                us.id as id, 
+    return $stmt->fetch(PDO::FETCH_ASSOC);
+  }
+
+  public function search($search, $limit, $offset, $group_id, $company_id)
+  {
+    $query = "
+            SELECT
+                us.id as id,
                 gr.id as group_id,
                 gr.name as `group`,
                 co.id as company_id,
                 co.name as company_name,
                 us.name as name,
-                us.email as email, 
-                us.active as active, 
-                us.created_user_id as created_user_id, 
-                us.created_date as created_date, 
-                us.updated_user_id as updated_user_id, 
-                us.updated_date as updated_date, 
-                upus.name as updated_user_name 
-            FROM 
-                `" . $this->table_name . "` us 
+                us.email as email,
+                us.active as active,
+                us.created_user_id as created_user_id,
+                us.created_date as created_date,
+                us.updated_user_id as updated_user_id,
+                us.updated_date as updated_date,
+                upus.name as updated_user_name
+            FROM
+                `" . $this->table_name . "` us
                 inner join `group` gr on us.group_id = gr.id
                 inner join `company` co on us.company_id = co.id
-                inner join `user` upus on us.id = upus.id 
-            WHERE 
+                inner join `user` upus on us.id = upus.id
+            WHERE
                 (LOWER(us.name) LIKE LOWER('%$search%') and (us.company_id = :company_id or :group_id = 1))
                 OR LOWER(us.email) LIKE LOWER('%$search%')
                 OR LOWER(gr.name) LIKE LOWER('%$search%')
             ORDER BY us.name
-            LIMIT $limit OFFSET $offset";    
+            LIMIT $limit OFFSET $offset";
 
-        $stmt = $this->conn->prepare($query);
-        $stmt->execute(['group_id' => $group_id, 'company_id' => $company_id]);
-        
-        $items = [];
+    $stmt = $this->conn->prepare($query);
+    $stmt->execute(['group_id' => $group_id, 'company_id' => $company_id]);
 
-        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            $items[] = $row;
-        }
-        
-        return $items;
+    $items = [];
+
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+      $items[] = $row;
     }
 
-    // VALIDATIONS
+    return $items;
+  }
 
-    public function existsByEmail($email) {
-        $query = "SELECT * FROM `" . $this->table_name . "` WHERE email = :email";
+  // VALIDATIONS
 
-        $stmt = $this->conn->prepare($query);
-        $stmt->execute(['email' => $email]);
+  public function existsByEmail($email)
+  {
+    $query = "SELECT * FROM `" . $this->table_name . "` WHERE email = :email";
 
-        return $stmt->rowCount() > 0;
-    }
+    $stmt = $this->conn->prepare($query);
+    $stmt->execute(['email' => $email]);
 
-    public function existsByEmailWhenEdit($email, $id) {
-        $query = "SELECT * FROM `" . $this->table_name . "` WHERE email = :email and id <> :id";
+    return $stmt->rowCount() > 0;
+  }
 
-        $stmt = $this->conn->prepare($query);
-        $stmt->execute([
-            'email' => $email,
-            'id' => $id
-        ]);
+  public function existsByEmailWhenEdit($email, $id)
+  {
+    $query = "SELECT * FROM `" . $this->table_name . "` WHERE email = :email and id <> :id";
 
-        return $stmt->rowCount() > 0;
-    }       
+    $stmt = $this->conn->prepare($query);
+    $stmt->execute([
+      'email' => $email,
+      'id' => $id
+    ]);
+
+    return $stmt->rowCount() > 0;
+  }
 }
-?>

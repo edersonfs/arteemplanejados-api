@@ -25,5 +25,3 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'OPTIONS') {
   http_response_code(204);
   exit;
 }
-
-?>
