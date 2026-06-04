@@ -171,6 +171,16 @@ class Expense
     return false;
   }
 
+  public function deleteByOrderItemId($order_item_id)
+  {
+    $query = "DELETE FROM `" . $this->table_name . "` WHERE order_item_id = :order_item_id";
+
+    $stmt = $this->conn->prepare($query);
+    $stmt->bindParam(':order_item_id', $order_item_id, PDO::PARAM_INT);
+
+    return $stmt->execute();
+  }
+
   private function selectColumnsSql(): string
   {
     return "

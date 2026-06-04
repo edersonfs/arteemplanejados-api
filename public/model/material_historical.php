@@ -129,6 +129,37 @@ class MaterialHistorical
     return false;
   }
 
+  public function getRowsByOrderItemId($order_item_id)
+  {
+    $query = "SELECT * FROM `" . $this->table_name . "` WHERE order_item_id = :order_item_id";
+
+    $stmt = $this->conn->prepare($query);
+    $stmt->execute(['order_item_id' => $order_item_id]);
+
+    $items = [];
+
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+      $items[] = $row;
+    }
+
+    return $items;
+  }
+
+  public function findLatestExitByOrderItemId($order_item_id)
+  {
+    $query = "SELECT * FROM `" . $this->table_name . "`
+            WHERE order_item_id = :order_item_id AND movement_type = 'EXIT'
+            ORDER BY created_date DESC, id DESC
+            LIMIT 1";
+
+    $stmt = $this->conn->prepare($query);
+    $stmt->execute(['order_item_id' => $order_item_id]);
+
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    return $row ?: null;
+  }
+
   /**
    * Prefer the CREATE snapshot row so material updates stay mirrored to cadastro history;
    * otherwise use the newest row so later movement entries are not rewritten in bulk.
