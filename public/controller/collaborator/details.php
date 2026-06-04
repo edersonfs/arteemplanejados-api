@@ -16,13 +16,13 @@ if (isset($_SERVER['HTTP_ORIGIN'])) {
 
 // Access-Control headers are received during OPTIONS requests
 if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
-    if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_METHOD']))
-        header("Access-Control-Allow-Methods: GET, POST, OPTIONS");         
+  if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_METHOD']))
+    header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
 
-    if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']))
-        header("Access-Control-Allow-Headers: {$_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']}");
+  if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']))
+    header("Access-Control-Allow-Headers: {$_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']}");
 
-    exit(0);
+  exit(0);
 }
 
 // end cors
@@ -44,43 +44,41 @@ $token = str_replace('Bearer ', '', $authorization);
 include_once '../../../app/database/Connection.php';
 include_once '../../model/collaborator.php';
 include_once '../../utils/utils.php';
- 
+
 // instantiate database and category object
 $conn = new Connection();
 $db = $conn->connect();
 
-try {        
-    $decoded = JWT::decode($token, new Key($_SERVER['KEY'], 'HS256'));
+try {
+  $decoded = JWT::decode($token, new Key($_SERVER['KEY'], 'HS256'));
 
-    // initialize object
-    $collaborator = new Collaborator($db);  
-    $utils = new Utils();   
+  // initialize object
+  $collaborator = new Collaborator($db);
+  $utils = new Utils();
 
-    // parameters
-    $id = filter_input(INPUT_GET, 'id', FILTER_DEFAULT); // FILTER_SANITIZE_STRING is deprecated
-    $id = "$id"; // Add wildcards for LIKE search
+  // parameters
+  $id = filter_input(INPUT_GET, 'id', FILTER_DEFAULT); // FILTER_SANITIZE_STRING is deprecated
+  $id = "$id"; // Add wildcards for LIKE search
 
-    $stmt = $collaborator->getById($id);
-    
-    if (is_array($stmt)) {
-        $num = count($stmt);
-    } else {
-        $num = $stmt->rowCount();
-    }
+  $stmt = $collaborator->getById($id);
 
-    $stmt = $utils->utf8ize($stmt);
-    
-    // check if more than 0 record found
-    if($num > 0) {    
-        echo json_encode(['collaborator' => [$stmt]]);
-    } else {
-        echo json_encode(
-            array("message" => "record_does_not_exist")
-        );
-    }  
+  if (is_array($stmt)) {
+    $num = count($stmt);
+  } else {
+    $num = $stmt->rowCount();
+  }
+
+  $stmt = $utils->utf8ize($stmt);
+
+  // check if more than 0 record found
+  if ($num > 0) {
+    echo json_encode(['collaborator' => [$stmt]]);
+  } else {
+    echo json_encode(
+      array("message" => "record_does_not_exist")
+    );
+  }
 } catch (Throwable $e) {
-    http_response_code(401);
-    die('EXPIRED');
+  http_response_code(401);
+  die('EXPIRED');
 }
- 
-?>

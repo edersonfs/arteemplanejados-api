@@ -180,6 +180,7 @@ try {
       'id' => $matRow['id'],
       'company_id' => $matRow['company_id'],
       'supplier_id' => $matRow['supplier_id'],
+      'material_type_id' => $matRow['material_type_id'],
       'name' => $matRow['name'],
       'description' => $matRow['description'],
       'unit_cost' => $matRow['unit_cost'],

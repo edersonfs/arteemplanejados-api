@@ -7,19 +7,19 @@ use Firebase\JWT\Key;
 use app\database\Connection;
 
 if (isset($_SERVER['HTTP_ORIGIN'])) {
-    header("Access-Control-Allow-Origin: {$_SERVER['HTTP_ORIGIN']}");
-    header('Access-Control-Allow-Credentials: true');
-    header('Access-Control-Max-Age: 86400');
+  header("Access-Control-Allow-Origin: {$_SERVER['HTTP_ORIGIN']}");
+  header('Access-Control-Allow-Credentials: true');
+  header('Access-Control-Max-Age: 86400');
 }
 
 if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
-    if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_METHOD']))
-        header("Access-Control-Allow-Methods: GET, POST, PUT, OPTIONS");
+  if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_METHOD']))
+    header("Access-Control-Allow-Methods: GET, POST, PUT, OPTIONS");
 
-    if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']))
-        header("Access-Control-Allow-Headers: {$_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']}");
+  if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']))
+    header("Access-Control-Allow-Headers: {$_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']}");
 
-    exit(0);
+  exit(0);
 }
 
 header("Access-Control-Allow-Origin: *");
@@ -40,81 +40,79 @@ $conn = new Connection();
 $db = $conn->connect();
 
 try {
-    $decoded = JWT::decode($token, new Key($_SERVER['KEY'], 'HS256'));
+  $decoded = JWT::decode($token, new Key($_SERVER['KEY'], 'HS256'));
 
-    $internalClient = new InternalClient($db);
+  $internalClient = new InternalClient($db);
 
-    if (isset($_FILES['image_file']) && $_FILES['image_file']['error'] === UPLOAD_ERR_OK) {
-        $uploadDir = dirname(__FILE__, 3) . '/wwwroot/images/';
+  if (isset($_FILES['image_file']) && $_FILES['image_file']['error'] === UPLOAD_ERR_OK) {
+    $uploadDir = dirname(__FILE__, 3) . '/wwwroot/images/';
 
-        if (!file_exists($uploadDir)) {
-            mkdir($uploadDir, 0777, true);
-        }
+    if (!file_exists($uploadDir)) {
+      mkdir($uploadDir, 0777, true);
+    }
 
-        $extension = pathinfo($_FILES['image_file']['name'], PATHINFO_EXTENSION);
-        $fileName = uniqid('img_', true) . '.' . $extension;
-        $targetPath = $uploadDir . $fileName;
+    $extension = pathinfo($_FILES['image_file']['name'], PATHINFO_EXTENSION);
+    $fileName = uniqid('img_', true) . '.' . $extension;
+    $targetPath = $uploadDir . $fileName;
 
-        if (move_uploaded_file($_FILES['image_file']['tmp_name'], $targetPath)) {
-            $image_file = $fileName;
-            $image_path = 'wwwroot/images/' . $fileName;
-        } else {
-            http_response_code(500);
-            die('Error uploading file');
-        }
+    if (move_uploaded_file($_FILES['image_file']['tmp_name'], $targetPath)) {
+      $image_file = $fileName;
+      $image_path = 'wwwroot/images/' . $fileName;
     } else {
-        $image_file = null;
-        $image_path = null;
+      http_response_code(500);
+      die('Error uploading file');
     }
+  } else {
+    $image_file = null;
+    $image_path = null;
+  }
 
-    $companyId = isset($_POST['company_id']) ? (int) $_POST['company_id'] : null;
+  $companyId = isset($_POST['company_id']) ? (int) $_POST['company_id'] : null;
 
-    if (empty($companyId)) {
-        echo json_encode(array("message" => "missing_company_id"));
-        exit;
-    }
+  if (empty($companyId)) {
+    echo json_encode(array("message" => "missing_company_id"));
+    exit;
+  }
 
-    $data = [
-        'company_id' => $companyId,
-        'name' => $_POST['name'] ?? null,
-        'cpf_cnpj' => $_POST['cpf_cnpj'] ?? null,
-        'address' => $_POST['address'] ?? null,
-        'city' => $_POST['city'] ?? null,
-        'state' => $_POST['state'] ?? null,
-        'phone' => $_POST['phone'] ?? null,
-        'email' => $_POST['email'] ?? null,
-        'notes' => $_POST['notes'] ?? null,
-        'active' => $_POST['active'] == 'true' ? 1 : 0,
-        'image_file' => $image_file,
-        'image_path' => $image_path,
-        'created_user_id' => $_POST['created_user_id'] ?? null,
-        'created_date' => $_POST['created_date'] ?? null,
-        'updated_user_id' => $_POST['updated_user_id'] ?? null,
-        'updated_date' => $_POST['updated_date'] ?? null
-    ];
+  $data = [
+    'company_id' => $companyId,
+    'name' => $_POST['name'] ?? null,
+    'cpf_cnpj' => $_POST['cpf_cnpj'] ?? null,
+    'address' => $_POST['address'] ?? null,
+    'city' => $_POST['city'] ?? null,
+    'state' => $_POST['state'] ?? null,
+    'phone' => $_POST['phone'] ?? null,
+    'email' => $_POST['email'] ?? null,
+    'notes' => $_POST['notes'] ?? null,
+    'active' => $_POST['active'] == 'true' ? 1 : 0,
+    'image_file' => $image_file,
+    'image_path' => $image_path,
+    'created_user_id' => $_POST['created_user_id'] ?? null,
+    'created_date' => $_POST['created_date'] ?? null,
+    'updated_user_id' => $_POST['updated_user_id'] ?? null,
+    'updated_date' => $_POST['updated_date'] ?? null
+  ];
 
-    if (!empty($data['cpf_cnpj']) && $internalClient->existsByCpfCnpj($data['cpf_cnpj'], $companyId)) {
-        echo json_encode([
-            "message" => "cpf_cnpj_already_exists"
-        ]);
-        exit;
-    }
+  if (!empty($data['cpf_cnpj']) && $internalClient->existsByCpfCnpj($data['cpf_cnpj'], $companyId)) {
+    echo json_encode([
+      "message" => "cpf_cnpj_already_exists"
+    ]);
+    exit;
+  }
 
-    if (!empty($data['email']) && $internalClient->existsByEmail($data['email'], $companyId)) {
-        echo json_encode([
-            "message" => "record_already_exists"
-        ]);
-        exit;
-    }
+  if (!empty($data['email']) && $internalClient->existsByEmail($data['email'], $companyId)) {
+    echo json_encode([
+      "message" => "record_already_exists"
+    ]);
+    exit;
+  }
 
-    if ($internalClient->create($data)) {
-        echo json_encode(['internal_client' => []]);
-    } else {
-        echo json_encode(array("message" => "error_creating_record"));
-    }
+  if ($internalClient->create($data)) {
+    echo json_encode(['internal_client' => []]);
+  } else {
+    echo json_encode(array("message" => "error_creating_record"));
+  }
 } catch (Throwable $e) {
-    http_response_code(401);
-    die('EXPIRED');
+  http_response_code(401);
+  die('EXPIRED');
 }
-
-?>

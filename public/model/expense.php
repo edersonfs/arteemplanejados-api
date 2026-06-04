@@ -1,35 +1,38 @@
 <?php
-class Expense {
+class Expense
+{
 
-    private $conn;
-    private $table_name = "expense";
+  private $conn;
+  private $table_name = "expense";
 
-    public $id;
-    public $company_id;
-    public $order_id;
-    public $order_item_id;
-    public $supplier_id;
-    public $material_id;
-    public $expense_type_id;
-    public $description;
-    public $quantity;
-    public $value;
-    public $expense_date;
-    public $payment_date;
-    public $status;
-    public $image_file;
-    public $image_path;
-    public $created_user_id;
-    public $created_date;
-    public $updated_user_id;
-    public $updated_date;
+  public $id;
+  public $company_id;
+  public $order_id;
+  public $order_item_id;
+  public $supplier_id;
+  public $material_id;
+  public $expense_type_id;
+  public $description;
+  public $quantity;
+  public $value;
+  public $expense_date;
+  public $payment_date;
+  public $status;
+  public $image_file;
+  public $image_path;
+  public $created_user_id;
+  public $created_date;
+  public $updated_user_id;
+  public $updated_date;
 
-    public function __construct($db) {
-        $this->conn = $db;
-    }
+  public function __construct($db)
+  {
+    $this->conn = $db;
+  }
 
-    public function create($data) {
-        $query = "INSERT INTO `" . $this->table_name . "`
+  public function create($data)
+  {
+    $query = "INSERT INTO `" . $this->table_name . "`
             (company_id, order_id, order_item_id, supplier_id, material_id, expense_type_id, description, quantity, value,
             expense_date, payment_date, status, image_file, image_path,
             created_user_id, created_date, updated_user_id, updated_date)
@@ -38,56 +41,57 @@ class Expense {
             :expense_date, :payment_date, :status, :image_file, :image_path,
             :created_user_id, :created_date, :updated_user_id, :updated_date)";
 
-        $stmt = $this->conn->prepare($query);
+    $stmt = $this->conn->prepare($query);
 
-        $stmt->bindParam(':company_id', $data['company_id'], PDO::PARAM_INT);
-        $stmt->bindValue(
-            ':order_id',
-            $data['order_id'],
-            $data['order_id'] === null || $data['order_id'] === ''
-                ? PDO::PARAM_NULL
-                : PDO::PARAM_INT
-        );
-        $stmt->bindValue(
-            ':order_item_id',
-            $data['order_item_id'],
-            $data['order_item_id'] === null || $data['order_item_id'] === ''
-                ? PDO::PARAM_NULL
-                : PDO::PARAM_INT
-        );
-        $stmt->bindValue(
-            ':supplier_id',
-            $data['supplier_id'],
-            $data['supplier_id'] === null || $data['supplier_id'] === ''
-                ? PDO::PARAM_NULL
-                : PDO::PARAM_INT
-        );
-        $stmt->bindValue(
-            ':material_id',
-            $data['material_id'],
-            $data['material_id'] === null || $data['material_id'] === ''
-                ? PDO::PARAM_NULL
-                : PDO::PARAM_INT
-        );
-        $stmt->bindParam(':expense_type_id', $data['expense_type_id'], PDO::PARAM_INT);
-        $stmt->bindParam(':description', $data['description']);
-        $stmt->bindParam(':quantity', $data['quantity']);
-        $stmt->bindParam(':value', $data['value']);
-        $stmt->bindParam(':expense_date', $data['expense_date']);
-        $stmt->bindParam(':payment_date', $data['payment_date']);
-        $stmt->bindParam(':status', $data['status']);
-        $stmt->bindParam(':image_file', $data['image_file']);
-        $stmt->bindParam(':image_path', $data['image_path']);
-        $stmt->bindParam(':created_user_id', $data['created_user_id'], PDO::PARAM_INT);
-        $stmt->bindParam(':created_date', $data['created_date']);
-        $stmt->bindParam(':updated_user_id', $data['updated_user_id'], PDO::PARAM_INT);
-        $stmt->bindParam(':updated_date', $data['updated_date']);
+    $stmt->bindParam(':company_id', $data['company_id'], PDO::PARAM_INT);
+    $stmt->bindValue(
+      ':order_id',
+      $data['order_id'],
+      $data['order_id'] === null || $data['order_id'] === ''
+        ? PDO::PARAM_NULL
+        : PDO::PARAM_INT
+    );
+    $stmt->bindValue(
+      ':order_item_id',
+      $data['order_item_id'],
+      $data['order_item_id'] === null || $data['order_item_id'] === ''
+        ? PDO::PARAM_NULL
+        : PDO::PARAM_INT
+    );
+    $stmt->bindValue(
+      ':supplier_id',
+      $data['supplier_id'],
+      $data['supplier_id'] === null || $data['supplier_id'] === ''
+        ? PDO::PARAM_NULL
+        : PDO::PARAM_INT
+    );
+    $stmt->bindValue(
+      ':material_id',
+      $data['material_id'],
+      $data['material_id'] === null || $data['material_id'] === ''
+        ? PDO::PARAM_NULL
+        : PDO::PARAM_INT
+    );
+    $stmt->bindParam(':expense_type_id', $data['expense_type_id'], PDO::PARAM_INT);
+    $stmt->bindParam(':description', $data['description']);
+    $stmt->bindParam(':quantity', $data['quantity']);
+    $stmt->bindParam(':value', $data['value']);
+    $stmt->bindParam(':expense_date', $data['expense_date']);
+    $stmt->bindParam(':payment_date', $data['payment_date']);
+    $stmt->bindParam(':status', $data['status']);
+    $stmt->bindParam(':image_file', $data['image_file']);
+    $stmt->bindParam(':image_path', $data['image_path']);
+    $stmt->bindParam(':created_user_id', $data['created_user_id'], PDO::PARAM_INT);
+    $stmt->bindParam(':created_date', $data['created_date']);
+    $stmt->bindParam(':updated_user_id', $data['updated_user_id'], PDO::PARAM_INT);
+    $stmt->bindParam(':updated_date', $data['updated_date']);
 
-        return $stmt->execute();
-    }
+    return $stmt->execute();
+  }
 
-    public function update($data) {
-        $query = "UPDATE `" . $this->table_name . "`
+  public function update($data)
+  {
+    $query = "UPDATE `" . $this->table_name . "`
                 SET company_id = :company_id,
                     order_id = :order_id,
                     order_item_id = :order_item_id,
@@ -106,68 +110,80 @@ class Expense {
                     updated_date = :updated_date
                 WHERE id = :id";
 
-        $stmt = $this->conn->prepare($query);
+    $stmt = $this->conn->prepare($query);
 
-        $stmt->bindParam(':company_id', $data['company_id'], PDO::PARAM_INT);
-        $stmt->bindValue(
-            ':order_id',
-            $data['order_id'],
-            $data['order_id'] === null || $data['order_id'] === ''
-                ? PDO::PARAM_NULL
-                : PDO::PARAM_INT
-        );
-        $stmt->bindValue(
-            ':order_item_id',
-            $data['order_item_id'],
-            $data['order_item_id'] === null || $data['order_item_id'] === ''
-                ? PDO::PARAM_NULL
-                : PDO::PARAM_INT
-        );
-        $stmt->bindValue(
-            ':supplier_id',
-            $data['supplier_id'],
-            $data['supplier_id'] === null || $data['supplier_id'] === ''
-                ? PDO::PARAM_NULL
-                : PDO::PARAM_INT
-        );
-        $stmt->bindValue(
-            ':material_id',
-            $data['material_id'],
-            $data['material_id'] === null || $data['material_id'] === ''
-                ? PDO::PARAM_NULL
-                : PDO::PARAM_INT
-        );
-        $stmt->bindParam(':expense_type_id', $data['expense_type_id'], PDO::PARAM_INT);
-        $stmt->bindParam(':description', $data['description']);
-        $stmt->bindParam(':quantity', $data['quantity']);
-        $stmt->bindParam(':value', $data['value']);
-        $stmt->bindParam(':expense_date', $data['expense_date']);
-        $stmt->bindParam(':payment_date', $data['payment_date']);
-        $stmt->bindParam(':status', $data['status']);
-        $stmt->bindParam(':image_file', $data['image_file']);
-        $stmt->bindParam(':image_path', $data['image_path']);
-        $stmt->bindParam(':updated_user_id', $data['updated_user_id'], PDO::PARAM_INT);
-        $stmt->bindParam(':updated_date', $data['updated_date']);
-        $stmt->bindParam(':id', $data['id'], PDO::PARAM_INT);
+    $stmt->bindParam(':company_id', $data['company_id'], PDO::PARAM_INT);
+    $stmt->bindValue(
+      ':order_id',
+      $data['order_id'],
+      $data['order_id'] === null || $data['order_id'] === ''
+        ? PDO::PARAM_NULL
+        : PDO::PARAM_INT
+    );
+    $stmt->bindValue(
+      ':order_item_id',
+      $data['order_item_id'],
+      $data['order_item_id'] === null || $data['order_item_id'] === ''
+        ? PDO::PARAM_NULL
+        : PDO::PARAM_INT
+    );
+    $stmt->bindValue(
+      ':supplier_id',
+      $data['supplier_id'],
+      $data['supplier_id'] === null || $data['supplier_id'] === ''
+        ? PDO::PARAM_NULL
+        : PDO::PARAM_INT
+    );
+    $stmt->bindValue(
+      ':material_id',
+      $data['material_id'],
+      $data['material_id'] === null || $data['material_id'] === ''
+        ? PDO::PARAM_NULL
+        : PDO::PARAM_INT
+    );
+    $stmt->bindParam(':expense_type_id', $data['expense_type_id'], PDO::PARAM_INT);
+    $stmt->bindParam(':description', $data['description']);
+    $stmt->bindParam(':quantity', $data['quantity']);
+    $stmt->bindParam(':value', $data['value']);
+    $stmt->bindParam(':expense_date', $data['expense_date']);
+    $stmt->bindParam(':payment_date', $data['payment_date']);
+    $stmt->bindParam(':status', $data['status']);
+    $stmt->bindParam(':image_file', $data['image_file']);
+    $stmt->bindParam(':image_path', $data['image_path']);
+    $stmt->bindParam(':updated_user_id', $data['updated_user_id'], PDO::PARAM_INT);
+    $stmt->bindParam(':updated_date', $data['updated_date']);
+    $stmt->bindParam(':id', $data['id'], PDO::PARAM_INT);
 
-        return $stmt->execute();
+    return $stmt->execute();
+  }
+
+  public function delete($id)
+  {
+    $query = "DELETE FROM `" . $this->table_name . "` WHERE id = :id";
+
+    $stmt = $this->conn->prepare($query);
+    $stmt->bindParam(":id", $id, PDO::PARAM_INT);
+
+    if ($stmt->execute()) {
+      return $stmt->rowCount() > 0;
     }
 
-    public function delete($id) {
-        $query = "DELETE FROM `" . $this->table_name . "` WHERE id = :id";
+    return false;
+  }
 
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(":id", $id, PDO::PARAM_INT);
+  public function deleteByOrderItemId($order_item_id)
+  {
+    $query = "DELETE FROM `" . $this->table_name . "` WHERE order_item_id = :order_item_id";
 
-        if ($stmt->execute()) {
-            return $stmt->rowCount() > 0;
-        }
+    $stmt = $this->conn->prepare($query);
+    $stmt->bindParam(':order_item_id', $order_item_id, PDO::PARAM_INT);
 
-        return false;
-    }
+    return $stmt->execute();
+  }
 
-    private function selectColumnsSql(): string {
-        return "
+  private function selectColumnsSql(): string
+  {
+    return "
                 exp.id as id,
                 exp.company_id as company_id,
                 cmp.name as company_name,
@@ -195,10 +211,11 @@ class Expense {
                 exp.updated_user_id as updated_user_id,
                 exp.updated_date as updated_date,
                 upus.name as updated_user_name";
-    }
+  }
 
-    private function fromJoinSql(): string {
-        return "
+  private function fromJoinSql(): string
+  {
+    return "
             FROM
                 `" . $this->table_name . "` exp
                 inner join `company` cmp on exp.company_id = cmp.id
@@ -209,47 +226,49 @@ class Expense {
                 inner join `expense_type` etp on exp.expense_type_id = etp.id
                 inner join `user` upus on exp.updated_user_id = upus.id
                 inner join `user` crus on exp.created_user_id = crus.id";
-    }
+  }
 
-    public function getAll($company_id, $order_id = 0, $material_id = 0, $order_item_id = 0) {
-        $orderClause = ((int) $order_id === 0) ? '' : ' AND exp.order_id = :order_id ';
-        $materialClause = ((int) $material_id === 0) ? '' : ' AND exp.material_id = :material_id ';
-        $orderItemClause = ((int) $order_item_id === 0) ? '' : ' AND exp.order_item_id = :order_item_id ';
-        $query = "SELECT " . $this->selectColumnsSql() . $this->fromJoinSql() . "
+  public function getAll($company_id, $order_id = 0, $material_id = 0, $order_item_id = 0)
+  {
+    $orderClause = ((int) $order_id === 0) ? '' : ' AND exp.order_id = :order_id ';
+    $materialClause = ((int) $material_id === 0) ? '' : ' AND exp.material_id = :material_id ';
+    $orderItemClause = ((int) $order_item_id === 0) ? '' : ' AND exp.order_item_id = :order_item_id ';
+    $query = "SELECT " . $this->selectColumnsSql() . $this->fromJoinSql() . "
             WHERE (exp.company_id = :company_id)
             $orderClause
             $materialClause
             $orderItemClause
             ORDER BY exp.expense_date DESC, exp.created_date DESC";
 
-        $params = ['company_id' => $company_id];
-        if ((int) $order_id !== 0) {
-            $params['order_id'] = $order_id;
-        }
-        if ((int) $material_id !== 0) {
-            $params['material_id'] = $material_id;
-        }
-        if ((int) $order_item_id !== 0) {
-            $params['order_item_id'] = $order_item_id;
-        }
-
-        $stmt = $this->conn->prepare($query);
-        $stmt->execute($params);
-
-        $items = [];
-
-        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            $items[] = $row;
-        }
-
-        return $items;
+    $params = ['company_id' => $company_id];
+    if ((int) $order_id !== 0) {
+      $params['order_id'] = $order_id;
+    }
+    if ((int) $material_id !== 0) {
+      $params['material_id'] = $material_id;
+    }
+    if ((int) $order_item_id !== 0) {
+      $params['order_item_id'] = $order_item_id;
     }
 
-    public function getPagination($limit, $offset, $company_id, $order_id = 0, $material_id = 0, $order_item_id = 0) {
-        $orderClause = ((int) $order_id === 0) ? '' : ' AND exp.order_id = :order_id ';
-        $materialClause = ((int) $material_id === 0) ? '' : ' AND exp.material_id = :material_id ';
-        $orderItemClause = ((int) $order_item_id === 0) ? '' : ' AND exp.order_item_id = :order_item_id ';
-        $query = "SELECT " . $this->selectColumnsSql() . $this->fromJoinSql() . "
+    $stmt = $this->conn->prepare($query);
+    $stmt->execute($params);
+
+    $items = [];
+
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+      $items[] = $row;
+    }
+
+    return $items;
+  }
+
+  public function getPagination($limit, $offset, $company_id, $order_id = 0, $material_id = 0, $order_item_id = 0)
+  {
+    $orderClause = ((int) $order_id === 0) ? '' : ' AND exp.order_id = :order_id ';
+    $materialClause = ((int) $material_id === 0) ? '' : ' AND exp.material_id = :material_id ';
+    $orderItemClause = ((int) $order_item_id === 0) ? '' : ' AND exp.order_item_id = :order_item_id ';
+    $query = "SELECT " . $this->selectColumnsSql() . $this->fromJoinSql() . "
             WHERE (exp.company_id = :company_id)
             $orderClause
             $materialClause
@@ -257,44 +276,46 @@ class Expense {
             ORDER BY exp.created_date DESC
             LIMIT $limit OFFSET $offset";
 
-        $params = ['company_id' => $company_id];
-        if ((int) $order_id !== 0) {
-            $params['order_id'] = $order_id;
-        }
-        if ((int) $material_id !== 0) {
-            $params['material_id'] = $material_id;
-        }
-        if ((int) $order_item_id !== 0) {
-            $params['order_item_id'] = $order_item_id;
-        }
-
-        $stmt = $this->conn->prepare($query);
-        $stmt->execute($params);
-
-        $items = [];
-
-        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            $items[] = $row;
-        }
-
-        return $items;
+    $params = ['company_id' => $company_id];
+    if ((int) $order_id !== 0) {
+      $params['order_id'] = $order_id;
+    }
+    if ((int) $material_id !== 0) {
+      $params['material_id'] = $material_id;
+    }
+    if ((int) $order_item_id !== 0) {
+      $params['order_item_id'] = $order_item_id;
     }
 
-    public function getById($id) {
-        $query = "SELECT " . $this->selectColumnsSql() . $this->fromJoinSql() . "
+    $stmt = $this->conn->prepare($query);
+    $stmt->execute($params);
+
+    $items = [];
+
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+      $items[] = $row;
+    }
+
+    return $items;
+  }
+
+  public function getById($id)
+  {
+    $query = "SELECT " . $this->selectColumnsSql() . $this->fromJoinSql() . "
             WHERE exp.id = :id";
 
-        $stmt = $this->conn->prepare($query);
-        $stmt->execute(['id' => $id]);
+    $stmt = $this->conn->prepare($query);
+    $stmt->execute(['id' => $id]);
 
-        return $stmt->fetch(PDO::FETCH_ASSOC);
-    }
+    return $stmt->fetch(PDO::FETCH_ASSOC);
+  }
 
-    public function search($search, $limit, $offset, $company_id, $order_id = 0, $material_id = 0, $order_item_id = 0) {
-        $orderClause = ((int) $order_id === 0) ? '' : ' AND exp.order_id = :order_id ';
-        $materialClause = ((int) $material_id === 0) ? '' : ' AND exp.material_id = :material_id ';
-        $orderItemClause = ((int) $order_item_id === 0) ? '' : ' AND exp.order_item_id = :order_item_id ';
-        $query = "
+  public function search($search, $limit, $offset, $company_id, $order_id = 0, $material_id = 0, $order_item_id = 0)
+  {
+    $orderClause = ((int) $order_id === 0) ? '' : ' AND exp.order_id = :order_id ';
+    $materialClause = ((int) $material_id === 0) ? '' : ' AND exp.material_id = :material_id ';
+    $orderItemClause = ((int) $order_item_id === 0) ? '' : ' AND exp.order_item_id = :order_item_id ';
+    $query = "
             SELECT " . $this->selectColumnsSql() . $this->fromJoinSql() . "
             WHERE
                 (exp.company_id = :company_id)
@@ -316,59 +337,60 @@ class Expense {
             ORDER BY exp.expense_date DESC
             LIMIT $limit OFFSET $offset";
 
-        $params = ['company_id' => $company_id];
-        if ((int) $order_id !== 0) {
-            $params['order_id'] = $order_id;
-        }
-        if ((int) $material_id !== 0) {
-            $params['material_id'] = $material_id;
-        }
-        if ((int) $order_item_id !== 0) {
-            $params['order_item_id'] = $order_item_id;
-        }
-
-        $stmt = $this->conn->prepare($query);
-        $stmt->execute($params);
-
-        $items = [];
-
-        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            $items[] = $row;
-        }
-
-        return $items;
+    $params = ['company_id' => $company_id];
+    if ((int) $order_id !== 0) {
+      $params['order_id'] = $order_id;
+    }
+    if ((int) $material_id !== 0) {
+      $params['material_id'] = $material_id;
+    }
+    if ((int) $order_item_id !== 0) {
+      $params['order_item_id'] = $order_item_id;
     }
 
-    public function findMaterialPurchaseExpenseId($material_id, $expense_type_id) {
-        $query = "SELECT id FROM `" . $this->table_name . "`
+    $stmt = $this->conn->prepare($query);
+    $stmt->execute($params);
+
+    $items = [];
+
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+      $items[] = $row;
+    }
+
+    return $items;
+  }
+
+  public function findMaterialPurchaseExpenseId($material_id, $expense_type_id)
+  {
+    $query = "SELECT id FROM `" . $this->table_name . "`
             WHERE material_id = :material_id AND expense_type_id = :expense_type_id
             ORDER BY id ASC
             LIMIT 1";
 
-        $stmt = $this->conn->prepare($query);
-        $stmt->execute([
-            'material_id' => $material_id,
-            'expense_type_id' => $expense_type_id,
-        ]);
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+    $stmt = $this->conn->prepare($query);
+    $stmt->execute([
+      'material_id' => $material_id,
+      'expense_type_id' => $expense_type_id,
+    ]);
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        return $row ? (int) $row['id'] : null;
-    }
+    return $row ? (int) $row['id'] : null;
+  }
 
-    public function findMaterialPurchaseExpenseIdByOrderItemId($order_item_id, $expense_type_id) {
-        $query = "SELECT id FROM `" . $this->table_name . "`
+  public function findMaterialPurchaseExpenseIdByOrderItemId($order_item_id, $expense_type_id)
+  {
+    $query = "SELECT id FROM `" . $this->table_name . "`
             WHERE order_item_id = :order_item_id AND expense_type_id = :expense_type_id
             ORDER BY id DESC
             LIMIT 1";
 
-        $stmt = $this->conn->prepare($query);
-        $stmt->execute([
-            'order_item_id' => $order_item_id,
-            'expense_type_id' => $expense_type_id,
-        ]);
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+    $stmt = $this->conn->prepare($query);
+    $stmt->execute([
+      'order_item_id' => $order_item_id,
+      'expense_type_id' => $expense_type_id,
+    ]);
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        return $row ? (int) $row['id'] : null;
-    }
+    return $row ? (int) $row['id'] : null;
+  }
 }
-?>

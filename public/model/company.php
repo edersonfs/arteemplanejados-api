@@ -1,49 +1,53 @@
 <?php
-class Company {
+class Company
+{
 
-    private $conn;
-    private $table_name = "company";
+  private $conn;
+  private $table_name = "company";
 
-    public $id;
-    public $name;
-    public $cnpj;
-    public $email;
-    public $phone;
-    public $image_file;
-    public $image_path;
-    public $created_user_id;
-    public $created_date;
-    public $updated_user_id;
-    public $updated_date;
+  public $id;
+  public $name;
+  public $cnpj;
+  public $email;
+  public $phone;
+  public $image_file;
+  public $image_path;
+  public $created_user_id;
+  public $created_date;
+  public $updated_user_id;
+  public $updated_date;
 
-    public function __construct($db) {
-        $this->conn = $db;
-    }
+  public function __construct($db)
+  {
+    $this->conn = $db;
+  }
 
-    public function create($data) {
-        $query = "INSERT INTO `" . $this->table_name . "`
+  public function create($data)
+  {
+    $query = "INSERT INTO `" . $this->table_name . "`
             (name, cnpj, email, phone, image_file, image_path, created_user_id, created_date, updated_user_id, updated_date)
             VALUES
             (:name, :cnpj, :email, :phone, :image_file, :image_path, :created_user_id, :created_date, :updated_user_id, :updated_date)";
 
-        $stmt = $this->conn->prepare($query);
+    $stmt = $this->conn->prepare($query);
 
-        $stmt->bindParam(':name', $data['name']);
-        $stmt->bindParam(':cnpj', $data['cnpj']);
-        $stmt->bindParam(':email', $data['email']);
-        $stmt->bindParam(':phone', $data['phone']);
-        $stmt->bindParam(':image_file', $data['image_file']);
-        $stmt->bindParam(':image_path', $data['image_path']);
-        $stmt->bindParam(':created_user_id', $data['created_user_id'], PDO::PARAM_INT);
-        $stmt->bindParam(':created_date', $data['created_date']);
-        $stmt->bindParam(':updated_user_id', $data['updated_user_id'], PDO::PARAM_INT);
-        $stmt->bindParam(':updated_date', $data['updated_date']);
+    $stmt->bindParam(':name', $data['name']);
+    $stmt->bindParam(':cnpj', $data['cnpj']);
+    $stmt->bindParam(':email', $data['email']);
+    $stmt->bindParam(':phone', $data['phone']);
+    $stmt->bindParam(':image_file', $data['image_file']);
+    $stmt->bindParam(':image_path', $data['image_path']);
+    $stmt->bindParam(':created_user_id', $data['created_user_id'], PDO::PARAM_INT);
+    $stmt->bindParam(':created_date', $data['created_date']);
+    $stmt->bindParam(':updated_user_id', $data['updated_user_id'], PDO::PARAM_INT);
+    $stmt->bindParam(':updated_date', $data['updated_date']);
 
-        return $stmt->execute();
-    }
+    return $stmt->execute();
+  }
 
-    public function update($data) {
-        $query = "UPDATE `" . $this->table_name . "`
+  public function update($data)
+  {
+    $query = "UPDATE `" . $this->table_name . "`
                 SET name = :name,
                     cnpj = :cnpj,
                     email = :email,
@@ -54,36 +58,38 @@ class Company {
                     updated_date = :updated_date
                 WHERE id = :id";
 
-        $stmt = $this->conn->prepare($query);
+    $stmt = $this->conn->prepare($query);
 
-        $stmt->bindParam(':name', $data['name']);
-        $stmt->bindParam(':cnpj', $data['cnpj']);
-        $stmt->bindParam(':email', $data['email']);
-        $stmt->bindParam(':phone', $data['phone']);
-        $stmt->bindParam(':image_file', $data['image_file']);
-        $stmt->bindParam(':image_path', $data['image_path']);
-        $stmt->bindParam(':updated_user_id', $data['updated_user_id'], PDO::PARAM_INT);
-        $stmt->bindParam(':updated_date', $data['updated_date']);
-        $stmt->bindParam(':id', $data['id'], PDO::PARAM_INT);
+    $stmt->bindParam(':name', $data['name']);
+    $stmt->bindParam(':cnpj', $data['cnpj']);
+    $stmt->bindParam(':email', $data['email']);
+    $stmt->bindParam(':phone', $data['phone']);
+    $stmt->bindParam(':image_file', $data['image_file']);
+    $stmt->bindParam(':image_path', $data['image_path']);
+    $stmt->bindParam(':updated_user_id', $data['updated_user_id'], PDO::PARAM_INT);
+    $stmt->bindParam(':updated_date', $data['updated_date']);
+    $stmt->bindParam(':id', $data['id'], PDO::PARAM_INT);
 
-        return $stmt->execute();
+    return $stmt->execute();
+  }
+
+  public function delete($id)
+  {
+    $query = "DELETE FROM `" . $this->table_name . "` WHERE id = :id";
+
+    $stmt = $this->conn->prepare($query);
+    $stmt->bindParam(":id", $id, PDO::PARAM_INT);
+
+    if ($stmt->execute()) {
+      return $stmt->rowCount() > 0;
     }
 
-    public function delete($id) {
-        $query = "DELETE FROM `" . $this->table_name . "` WHERE id = :id";
+    return false;
+  }
 
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(":id", $id, PDO::PARAM_INT);
-
-        if ($stmt->execute()) {
-            return $stmt->rowCount() > 0;
-        }
-
-        return false;
-    }
-
-    public function getAll($group_id, $company_id) {
-        $query = "
+  public function getAll($group_id, $company_id)
+  {
+    $query = "
             SELECT
                 co.id as id,
                 co.name as name,
@@ -105,20 +111,21 @@ class Company {
             WHERE (co.id = :company_id or :group_id = 1)
             ORDER BY co.name";
 
-        $stmt = $this->conn->prepare($query);
-        $stmt->execute(['group_id' => $group_id, 'company_id' => $company_id]);
+    $stmt = $this->conn->prepare($query);
+    $stmt->execute(['group_id' => $group_id, 'company_id' => $company_id]);
 
-        $items = [];
+    $items = [];
 
-        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            $items[] = $row;
-        }
-
-        return $items;
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+      $items[] = $row;
     }
 
-    public function getPagination($limit, $offset, $group_id, $company_id) {
-        $query = "
+    return $items;
+  }
+
+  public function getPagination($limit, $offset, $group_id, $company_id)
+  {
+    $query = "
             SELECT
                 co.id as id,
                 co.name as name,
@@ -141,20 +148,21 @@ class Company {
             ORDER BY co.name
             LIMIT $limit OFFSET $offset";
 
-        $stmt = $this->conn->prepare($query);
-        $stmt->execute(['group_id' => $group_id, 'company_id' => $company_id]);
+    $stmt = $this->conn->prepare($query);
+    $stmt->execute(['group_id' => $group_id, 'company_id' => $company_id]);
 
-        $items = [];
+    $items = [];
 
-        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            $items[] = $row;
-        }
-
-        return $items;
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+      $items[] = $row;
     }
 
-    public function getById($id) {
-        $query = "
+    return $items;
+  }
+
+  public function getById($id)
+  {
+    $query = "
             SELECT
                 co.id as id,
                 co.name as name,
@@ -175,14 +183,15 @@ class Company {
                 inner join `user` crus on co.created_user_id = crus.id
             WHERE co.id = :id";
 
-        $stmt = $this->conn->prepare($query);
-        $stmt->execute(['id' => $id]);
+    $stmt = $this->conn->prepare($query);
+    $stmt->execute(['id' => $id]);
 
-        return $stmt->fetch(PDO::FETCH_ASSOC);
-    }
+    return $stmt->fetch(PDO::FETCH_ASSOC);
+  }
 
-    public function search($search, $limit, $offset, $group_id, $company_id) {
-        $query = "
+  public function search($search, $limit, $offset, $group_id, $company_id)
+  {
+    $query = "
             SELECT
                 co.id as id,
                 co.name as name,
@@ -210,58 +219,61 @@ class Company {
             ORDER BY co.name
             LIMIT $limit OFFSET $offset";
 
-        $stmt = $this->conn->prepare($query);
-        $stmt->execute();
+    $stmt = $this->conn->prepare($query);
+    $stmt->execute();
 
-        $items = [];
+    $items = [];
 
-        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            $items[] = $row;
-        }
-
-        return $items;
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+      $items[] = $row;
     }
 
-    public function existsByCnpj($cnpj) {
-        $query = "SELECT * FROM `" . $this->table_name . "` WHERE cnpj = :cnpj";
+    return $items;
+  }
 
-        $stmt = $this->conn->prepare($query);
-        $stmt->execute(['cnpj' => $cnpj]);
+  public function existsByCnpj($cnpj)
+  {
+    $query = "SELECT * FROM `" . $this->table_name . "` WHERE cnpj = :cnpj";
 
-        return $stmt->rowCount() > 0;
-    }
+    $stmt = $this->conn->prepare($query);
+    $stmt->execute(['cnpj' => $cnpj]);
 
-    public function existsByCnpjWhenEdit($cnpj, $id) {
-        $query = "SELECT * FROM `" . $this->table_name . "` WHERE cnpj = :cnpj AND id <> :id";
+    return $stmt->rowCount() > 0;
+  }
 
-        $stmt = $this->conn->prepare($query);
-        $stmt->execute([
-            'cnpj' => $cnpj,
-            'id' => $id
-        ]);
+  public function existsByCnpjWhenEdit($cnpj, $id)
+  {
+    $query = "SELECT * FROM `" . $this->table_name . "` WHERE cnpj = :cnpj AND id <> :id";
 
-        return $stmt->rowCount() > 0;
-    }
+    $stmt = $this->conn->prepare($query);
+    $stmt->execute([
+      'cnpj' => $cnpj,
+      'id' => $id
+    ]);
 
-    public function existsByEmail($email) {
-        $query = "SELECT * FROM `" . $this->table_name . "` WHERE email = :email";
+    return $stmt->rowCount() > 0;
+  }
 
-        $stmt = $this->conn->prepare($query);
-        $stmt->execute(['email' => $email]);
+  public function existsByEmail($email)
+  {
+    $query = "SELECT * FROM `" . $this->table_name . "` WHERE email = :email";
 
-        return $stmt->rowCount() > 0;
-    }
+    $stmt = $this->conn->prepare($query);
+    $stmt->execute(['email' => $email]);
 
-    public function existsByEmailWhenEdit($email, $id) {
-        $query = "SELECT * FROM `" . $this->table_name . "` WHERE email = :email AND id <> :id";
+    return $stmt->rowCount() > 0;
+  }
 
-        $stmt = $this->conn->prepare($query);
-        $stmt->execute([
-            'email' => $email,
-            'id' => $id
-        ]);
+  public function existsByEmailWhenEdit($email, $id)
+  {
+    $query = "SELECT * FROM `" . $this->table_name . "` WHERE email = :email AND id <> :id";
 
-        return $stmt->rowCount() > 0;
-    }
+    $stmt = $this->conn->prepare($query);
+    $stmt->execute([
+      'email' => $email,
+      'id' => $id
+    ]);
+
+    return $stmt->rowCount() > 0;
+  }
 }
-?>
