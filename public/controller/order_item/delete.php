@@ -76,6 +76,12 @@ try {
 
   $linkedHistorical = $materialHistorical->getRowsByOrderItemId($orderItemId);
 
+  if ($latestExitRow) {
+    $latestExitStock = $materialHistorical->findLatestExitById((int) $latestExitRow['id']);
+  } else {
+    $latestExitStock = 0;
+  }
+
   foreach ($linkedHistorical as $histRow) {
     $updatePayload = [
       'id' => (int) $histRow['id'],
@@ -101,7 +107,7 @@ try {
   }
 
   if ($latestExitRow) {
-    $restoredStock = (float) ($latestExitRow['quantity'] ?? 0);
+    $restoredStock = (float) ((int) ($latestExitRow['quantity'] ?? 0) + $latestExitStock);
     $exitQuantity = $restoredStock;
 
     if ($exitQuantity > 0) {
@@ -186,5 +192,3 @@ try {
   http_response_code(401);
   die('EXPIRED' . $e);
 }
-
-?>

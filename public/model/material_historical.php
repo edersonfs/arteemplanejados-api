@@ -145,7 +145,19 @@ class MaterialHistorical
     return $items;
   }
 
-  public function findLatestExitByOrderItemId($order_item_id)
+  public function findLatestExitById(int $id): ?float
+  {
+    $query = "SELECT stock FROM `" . $this->table_name . "` WHERE id > :id and movement_type = 'EXIT' ORDER BY id DESC LIMIT 1";
+
+    $stmt = $this->conn->prepare($query);
+    $stmt->execute(['id' => $id]);
+
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    return $row ? (float) $row['stock'] : null;
+  }
+
+  public function findLatestExitByOrderItemId(int $order_item_id)
   {
     $query = "SELECT * FROM `" . $this->table_name . "`
             WHERE order_item_id = :order_item_id AND movement_type = 'EXIT'
