@@ -122,5 +122,5 @@ try {
   }
 } catch (Throwable $e) {
   http_response_code(401);
-  die('EXPIRED');
+  die('EXPIRED' . $e);
 }
