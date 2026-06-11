@@ -14,6 +14,8 @@ class Order
   public $start_date;
   public $install_date;
   public $delivery_date;
+  public $fixed_cost;
+  public $freight;
   public $total;
   public $notes;
   public $priority;
@@ -34,11 +36,11 @@ class Order
   {
     $query = "INSERT INTO `" . $this->table_name . "`
             (company_id, internal_client_id, budget_id, `number`, status,
-            start_date, install_date, delivery_date, total, notes, priority, estimated_days,
+            start_date, install_date, delivery_date, fixed_cost, freight, total, notes, priority, estimated_days,
             image_file, image_path, created_user_id, created_date, updated_user_id, updated_date)
             VALUES
             (:company_id, :internal_client_id, :budget_id, :number, :status,
-            :start_date, :install_date, :delivery_date, :total, :notes, :priority, :estimated_days,
+            :start_date, :install_date, :delivery_date, :fixed_cost, :freight, :total, :notes, :priority, :estimated_days,
             :image_file, :image_path, :created_user_id, :created_date, :updated_user_id, :updated_date)";
 
     $stmt = $this->conn->prepare($query);
@@ -63,6 +65,20 @@ class Order
     $stmt->bindParam(':start_date', $data['start_date']);
     $stmt->bindParam(':install_date', $data['install_date']);
     $stmt->bindParam(':delivery_date', $data['delivery_date']);
+    $stmt->bindValue(
+      ':fixed_cost',
+      $data['fixed_cost'],
+      $data['fixed_cost'] === null || $data['fixed_cost'] === ''
+        ? PDO::PARAM_NULL
+        : PDO::PARAM_STR
+    );
+    $stmt->bindValue(
+      ':freight',
+      $data['freight'],
+      $data['freight'] === null || $data['freight'] === ''
+        ? PDO::PARAM_NULL
+        : PDO::PARAM_STR
+    );
     $stmt->bindParam(':total', $data['total']);
     $stmt->bindParam(':notes', $data['notes']);
     $stmt->bindParam(':priority', $data['priority']);
@@ -88,6 +104,8 @@ class Order
                     start_date = :start_date,
                     install_date = :install_date,
                     delivery_date = :delivery_date,
+                    fixed_cost = :fixed_cost,
+                    freight = :freight,
                     total = :total,
                     notes = :notes,
                     priority = :priority,
@@ -120,6 +138,20 @@ class Order
     $stmt->bindParam(':start_date', $data['start_date']);
     $stmt->bindParam(':install_date', $data['install_date']);
     $stmt->bindParam(':delivery_date', $data['delivery_date']);
+    $stmt->bindValue(
+      ':fixed_cost',
+      $data['fixed_cost'],
+      $data['fixed_cost'] === null || $data['fixed_cost'] === ''
+        ? PDO::PARAM_NULL
+        : PDO::PARAM_STR
+    );
+    $stmt->bindValue(
+      ':freight',
+      $data['freight'],
+      $data['freight'] === null || $data['freight'] === ''
+        ? PDO::PARAM_NULL
+        : PDO::PARAM_STR
+    );
     $stmt->bindParam(':total', $data['total']);
     $stmt->bindParam(':notes', $data['notes']);
     $stmt->bindParam(':priority', $data['priority']);
@@ -162,6 +194,8 @@ class Order
                 ord.start_date as start_date,
                 ord.install_date as install_date,
                 ord.delivery_date as delivery_date,
+                ord.fixed_cost as fixed_cost,
+                ord.freight as freight,
                 ord.total as total,
                 ord.notes as notes,
                 ord.priority as priority,
@@ -253,6 +287,8 @@ class Order
                     OR LOWER(IFNULL(ord.notes, '')) LIKE LOWER('%$search%')
                     OR LOWER(IFNULL(CAST(ord.priority AS CHAR), '')) LIKE LOWER('%$search%')
                     OR LOWER(IFNULL(CAST(ord.estimated_days AS CHAR), '')) LIKE LOWER('%$search%')
+                    OR LOWER(IFNULL(CAST(ord.fixed_cost AS CHAR), '')) LIKE LOWER('%$search%')
+                    OR LOWER(IFNULL(CAST(ord.freight AS CHAR), '')) LIKE LOWER('%$search%')
                     OR LOWER(IFNULL(CAST(ord.total AS CHAR), '')) LIKE LOWER('%$search%')
                     OR LOWER(IFNULL(ic.name, '')) LIKE LOWER('%$search%')
                     OR LOWER(IFNULL(cmp.name, '')) LIKE LOWER('%$search%')

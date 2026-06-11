@@ -181,6 +181,47 @@ class BudgetItem
     return false;
   }
 
+  public function sumMaterialAndLaborTotalByBudgetId($budget_id)
+  {
+    $query = "SELECT
+                COALESCE(SUM(CASE WHEN budget_item_type = 'MATERIAL' THEN total ELSE 0 END), 0)
+              + COALESCE(SUM(CASE WHEN budget_item_type = 'LABOR' THEN total ELSE 0 END), 0) AS sumMaterialAndLabor
+              FROM `" . $this->table_name . "`
+              WHERE budget_id = :budget_id";
+
+    $stmt = $this->conn->prepare($query);
+    $stmt->execute(['budget_id' => $budget_id]);
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    return $row ? (float) $row['sumMaterialAndLabor'] : 0.0;
+  }
+
+  public function fixedCostByBudgetId($budget_id)
+  {
+    $query = "SELECT COALESCE(SUM(fixed_cost), 0) AS fixed_cost
+              FROM `" . $this->table_name . "`
+              WHERE budget_id = :budget_id AND budget_item_type = 'FIXED COST'";
+
+    $stmt = $this->conn->prepare($query);
+    $stmt->execute(['budget_id' => $budget_id]);
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    return $row ? (float) $row['fixed_cost'] : 0.0;
+  }
+
+  public function sumFreightTotalByBudgetId($budget_id)
+  {
+    $query = "SELECT COALESCE(SUM(freight), 0) AS freight
+              FROM `" . $this->table_name . "`
+              WHERE budget_id = :budget_id AND budget_item_type = 'FREIGHT'";
+
+    $stmt = $this->conn->prepare($query);
+    $stmt->execute(['budget_id' => $budget_id]);
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    return $row ? (float) $row['freight'] : 0.0;
+  }
+
   private function selectColumnsSql(): string
   {
     return "

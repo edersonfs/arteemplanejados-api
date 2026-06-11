@@ -99,6 +99,8 @@ try {
     'start_date' => $_POST['start_date'] ?? null,
     'install_date' => $_POST['install_date'] ?? null,
     'delivery_date' => $_POST['delivery_date'] ?? null,
+    'fixed_cost' => isset($_POST['fixed_cost']) && $_POST['fixed_cost'] !== '' ? $_POST['fixed_cost'] : null,
+    'freight' => isset($_POST['freight']) && $_POST['freight'] !== '' ? $_POST['freight'] : null,
     'total' => $_POST['total'] ?? null,
     'notes' => $_POST['notes'] ?? null,
     'priority' => $_POST['priority'] ?? null,

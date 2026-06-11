@@ -108,7 +108,7 @@ try {
     $order = new Order($db);
     $data['id'] = $budgetId;
 
-    if (!budget_order_sync_if_approved($order, $budgetId, $data)) {
+    if (!budget_order_sync_if_approved($order, $budgetId, $data, $db)) {
       echo json_encode(array("message" => "error_creating_order"));
       exit;
     }
