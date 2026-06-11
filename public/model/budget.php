@@ -99,6 +99,30 @@ class Budget
     return $stmt->execute();
   }
 
+  public function applyCost($id, $cost, $updated_user_id = null, $updated_date = null)
+  {
+    $query = "UPDATE `" . $this->table_name . "`
+                SET cost = :cost,
+                    updated_user_id = :updated_user_id,
+                    updated_date = :updated_date
+                WHERE id = :id";
+
+    $stmt = $this->conn->prepare($query);
+
+    $stmt->bindParam(':cost', $cost);
+    $stmt->bindValue(
+      ':updated_user_id',
+      $updated_user_id,
+      $updated_user_id === null || $updated_user_id === ''
+        ? PDO::PARAM_NULL
+        : PDO::PARAM_INT
+    );
+    $stmt->bindParam(':updated_date', $updated_date);
+    $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+
+    return $stmt->execute();
+  }
+
   public function delete($id)
   {
     $query = "DELETE FROM `" . $this->table_name . "` WHERE id = :id";

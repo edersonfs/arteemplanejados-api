@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Tempo de geração: 09/06/2026 às 14:51
+-- Tempo de geração: 11/06/2026 às 21:30
 -- Versão do servidor: 10.4.32-MariaDB
 -- Versão do PHP: 8.0.30
 
@@ -116,7 +116,7 @@ CREATE TABLE `budget` (
 --
 
 INSERT INTO `budget` (`id`, `company_id`, `internal_client_id`, `number`, `status`, `cost`, `sale`, `profit`, `image_file`, `image_path`, `created_user_id`, `created_date`, `updated_user_id`, `updated_date`) VALUES
-(6, 1, 3, '001', 'approved', 575.00, 4570.00, 3995.00, 'img_6a1c37f5e23756.23314226.png', 'wwwroot/images/img_6a1c37f5e23756.23314226.png', 1, '2026-05-31 10:30:29', 1, '2026-06-05 16:00:53');
+(7, 1, 3, '1', 'draft', 465.00, 20.00, 19.56, 'img_6a2b0bf6c5f2b5.03503400.jpg', 'wwwroot/images/img_6a2b0bf6c5f2b5.03503400.jpg', 1, '2026-06-11 13:27:44', 1, '2026-06-11 16:26:53');
 
 -- --------------------------------------------------------
 
@@ -133,7 +133,7 @@ CREATE TABLE `budget_item` (
   `fixed_cost` int(11) DEFAULT NULL,
   `freight` decimal(10,0) DEFAULT NULL,
   `description` text DEFAULT NULL,
-  `quantity` decimal(15,2) DEFAULT 0.00,
+  `quantity` int(11) DEFAULT 0,
   `width` decimal(15,2) DEFAULT NULL,
   `height` decimal(15,2) DEFAULT NULL,
   `unit_price` decimal(15,2) DEFAULT 0.00,
@@ -151,11 +151,10 @@ CREATE TABLE `budget_item` (
 --
 
 INSERT INTO `budget_item` (`id`, `budget_id`, `budget_item_type`, `material_id`, `hours`, `fixed_cost`, `freight`, `description`, `quantity`, `width`, `height`, `unit_price`, `total`, `image_file`, `image_path`, `created_user_id`, `created_date`, `updated_user_id`, `updated_date`) VALUES
-(4, 6, 'MATERIAL', 24, NULL, NULL, NULL, '', 2.00, 0.00, 0.00, 25.00, 50.00, NULL, NULL, 1, '2026-06-05 13:29:19', 1, '2026-06-05 13:29:19'),
-(5, 6, 'FIXED COST', NULL, NULL, 10, NULL, '', 0.00, 0.00, 0.00, 0.00, 0.00, NULL, NULL, 1, '2026-06-05 13:42:14', 1, '2026-06-05 13:42:14'),
-(6, 6, 'MATERIAL', 24, NULL, NULL, NULL, 'test', 9.00, 4.00, 4.00, 25.00, 225.00, NULL, NULL, 1, '2026-06-05 14:01:28', 1, '2026-06-06 08:16:46'),
-(7, 6, 'LABOR', NULL, 8, NULL, NULL, '', 0.00, 0.00, 0.00, 0.00, 0.00, NULL, NULL, 1, '2026-06-05 14:29:31', 1, '2026-06-05 14:29:40'),
-(8, 6, 'FREIGHT', NULL, NULL, NULL, 100, '', 0.00, 0.00, 0.00, 0.00, 0.00, NULL, NULL, 1, '2026-06-05 14:35:56', 1, '2026-06-06 08:21:32');
+(15, 7, 'MATERIAL', 25, NULL, NULL, NULL, 'aaa', 5, 4.00, 5.00, 25.00, 125.00, NULL, NULL, 1, '2026-06-11 14:17:14', 1, '2026-06-11 14:17:14'),
+(16, 7, 'FIXED COST', NULL, NULL, 10, NULL, '', 0, 0.00, 0.00, 0.00, 0.00, NULL, NULL, 1, '2026-06-11 14:20:15', 1, '2026-06-11 14:20:15'),
+(17, 7, 'LABOR', NULL, 5, NULL, NULL, '', 0, 0.00, 0.00, 5.00, 25.00, NULL, NULL, 1, '2026-06-11 14:21:42', 1, '2026-06-11 14:21:42'),
+(18, 7, 'FREIGHT', NULL, NULL, NULL, 300, '', 0, 0.00, 0.00, 0.00, 0.00, NULL, NULL, 1, '2026-06-11 14:22:34', 1, '2026-06-11 14:22:34');
 
 -- --------------------------------------------------------
 
@@ -372,7 +371,7 @@ CREATE TABLE `expense` (
 --
 
 INSERT INTO `expense` (`id`, `company_id`, `order_id`, `order_item_id`, `supplier_id`, `material_id`, `expense_type_id`, `description`, `quantity`, `value`, `expense_date`, `payment_date`, `status`, `image_file`, `image_path`, `created_user_id`, `created_date`, `updated_user_id`, `updated_date`) VALUES
-(36, 1, 5, 37, 2, 24, 7, 'MDF Branco', 45, 1125.00, '2026-06-06', '2026-06-06', 'pending', NULL, NULL, 1, '2026-06-06 09:24:26', 1, '2026-06-09 08:52:08');
+(37, 1, NULL, NULL, 2, 25, 7, 'MDF Branco', 10, 2.50, '2026-06-11', '2026-06-11', 'PAID', NULL, NULL, 1, '2026-06-11 13:58:50', 1, '2026-06-11 13:58:50');
 
 -- --------------------------------------------------------
 
@@ -496,8 +495,8 @@ CREATE TABLE `internal_client` (
   `email` varchar(150) DEFAULT NULL,
   `notes` text DEFAULT NULL,
   `active` tinyint(1) NOT NULL DEFAULT 1,
-  `image_file` varchar(255) NOT NULL,
-  `image_path` varchar(255) NOT NULL,
+  `image_file` varchar(255) DEFAULT NULL,
+  `image_path` varchar(255) DEFAULT NULL,
   `created_user_id` int(11) NOT NULL,
   `created_date` datetime NOT NULL DEFAULT current_timestamp(),
   `updated_user_id` int(11) DEFAULT NULL,
@@ -509,7 +508,7 @@ CREATE TABLE `internal_client` (
 --
 
 INSERT INTO `internal_client` (`id`, `company_id`, `name`, `cpf_cnpj`, `address`, `city`, `state`, `phone`, `email`, `notes`, `active`, `image_file`, `image_path`, `created_user_id`, `created_date`, `updated_user_id`, `updated_date`) VALUES
-(3, 1, 'Vital Imobiliaria', '061.789.586-41', 'Rua Joao de Matos Silva, 582', 'Belo Horizonte', 'MG', '31994070754', 'edersonfs@gmail.com', 'Nenhuma', 1, 'img_6a1c36c5931676.87967761.jpg', 'wwwroot/images/img_6a1c36c5931676.87967761.jpg', 1, '2026-05-31 10:25:25', 1, '2026-06-04 14:43:37');
+(3, 1, 'Vital Imobiliaria', '061.789.586-41', 'Rua Joao de Matos Silva, 582', 'Belo Horizonte', 'MG', '31994070754', 'edersonfs@gmail.com', 'Nenhuma', 1, 'img_6a2affa3f3e8b5.67595772.jpg', 'wwwroot/images/img_6a2affa3f3e8b5.67595772.jpg', 1, '2026-05-31 10:25:25', 1, '2026-06-11 15:34:11');
 
 -- --------------------------------------------------------
 
@@ -547,8 +546,8 @@ CREATE TABLE `material` (
   `unit_cost` decimal(15,2) NOT NULL DEFAULT 0.00,
   `sale_price` decimal(15,2) NOT NULL DEFAULT 0.00,
   `stock` int(11) NOT NULL DEFAULT 0,
-  `image_file` varchar(255) NOT NULL,
-  `image_path` varchar(255) NOT NULL,
+  `image_file` varchar(255) DEFAULT NULL,
+  `image_path` varchar(255) DEFAULT NULL,
   `created_user_id` int(11) NOT NULL,
   `created_date` datetime NOT NULL DEFAULT current_timestamp(),
   `updated_user_id` int(11) DEFAULT NULL,
@@ -560,7 +559,7 @@ CREATE TABLE `material` (
 --
 
 INSERT INTO `material` (`id`, `company_id`, `supplier_id`, `material_type_id`, `name`, `description`, `unit_cost`, `sale_price`, `stock`, `image_file`, `image_path`, `created_user_id`, `created_date`, `updated_user_id`, `updated_date`) VALUES
-(24, 1, 2, 1, 'MDF Branco', '', 25.00, 25.00, 0, 'img_6a218e35b20a53.25243462.png', 'wwwroot/images/img_6a218e35b20a53.25243462.png', 1, '2026-06-04 11:39:49', 1, '2026-06-06 09:24:26');
+(25, 1, 2, 1, 'MDF Branco', 'branco palido com manchas', 25.00, 25.00, 10, NULL, NULL, 1, '2026-06-11 13:58:50', 1, '2026-06-11 15:33:21');
 
 -- --------------------------------------------------------
 
@@ -591,16 +590,7 @@ CREATE TABLE `material_historical` (
 --
 
 INSERT INTO `material_historical` (`id`, `material_id`, `company_id`, `supplier_id`, `order_item_id`, `explanation`, `quantity`, `unit_cost`, `sales_price`, `stock`, `movement_type`, `created_user_id`, `created_date`, `updated_user_id`, `updated_date`) VALUES
-(88, 24, 1, 2, NULL, 'branco', 100, 25.00, 25.00, 100, 'ENTRY', 1, '2026-06-04 11:39:49', 1, '2026-06-04 11:39:49'),
-(89, 24, 1, 2, NULL, 'branco', 10, 25.00, 25.00, 90, 'REMOVE', 1, '2026-06-04 11:40:26', 1, '2026-06-04 11:40:26'),
-(90, 24, 1, 2, NULL, '', 75, 25.00, 25.00, 75, 'REMOVE', 1, '2026-06-04 11:40:53', 1, '2026-06-04 11:40:53'),
-(91, 24, 1, 2, NULL, 'branco', 75, 25.00, 25.00, 75, 'ADJUSTMENT', 1, '2026-06-04 11:40:26', 1, '2026-06-04 11:40:26'),
-(92, 24, 1, 2, NULL, '', 44, 25.00, 25.00, 31, 'REMOVE', 1, '2026-06-06 09:12:20', 1, '2026-06-06 09:12:20'),
-(93, 24, 1, 2, NULL, '', 44, 25.00, 25.00, 44, 'ADJUSTMENT', 1, '2026-06-06 09:12:20', 1, '2026-06-06 09:12:20'),
-(94, 24, 1, 2, NULL, '', 5, 25.00, 25.00, 39, 'REMOVE', 1, '2026-06-06 09:13:02', 1, '2026-06-06 09:13:02'),
-(95, 24, 1, 2, NULL, '', 5, 25.00, 25.00, 5, 'ADJUSTMENT', 1, '2026-06-06 09:13:02', 1, '2026-06-06 09:13:02'),
-(96, 24, 1, 2, 37, '', 5, 25.00, 25.00, 0, 'EXIT', 1, '2026-06-06 09:24:26', 1, '2026-06-06 09:24:26'),
-(97, 24, 1, 2, 37, '', 45, 25.00, 25.00, 0, 'BOUGHT TRHOUGH STORE', 1, '2026-06-06 09:24:26', 1, '2026-06-06 09:24:26');
+(98, 25, 1, 2, NULL, 'branco palido com manchas', 10, 25.00, 25.00, 10, 'ADJUSTMENT', 1, '2026-06-11 13:58:50', 1, '2026-06-11 15:33:21');
 
 -- --------------------------------------------------------
 
@@ -660,13 +650,6 @@ CREATE TABLE `order` (
   `updated_date` datetime DEFAULT NULL ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Despejando dados para a tabela `order`
---
-
-INSERT INTO `order` (`id`, `company_id`, `internal_client_id`, `budget_id`, `number`, `status`, `start_date`, `install_date`, `delivery_date`, `total`, `notes`, `priority`, `estimated_days`, `image_file`, `image_path`, `created_user_id`, `created_date`, `updated_user_id`, `updated_date`) VALUES
-(5, 1, 3, 6, '002', 'draft', '0000-00-00', '0000-00-00', '0000-00-00', 3000.00, '', '', 0, NULL, NULL, 1, '2026-06-06 09:23:08', 1, '2026-06-06 09:23:08');
-
 -- --------------------------------------------------------
 
 --
@@ -693,13 +676,6 @@ CREATE TABLE `order_item` (
   `updated_user_id` int(11) DEFAULT NULL,
   `updated_date` datetime DEFAULT NULL ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Despejando dados para a tabela `order_item`
---
-
-INSERT INTO `order_item` (`id`, `company_id`, `order_id`, `material_id`, `description`, `quantity`, `width`, `height`, `color`, `unit_cost`, `total`, `discount_for_stock`, `image_file`, `image_path`, `created_user_id`, `created_date`, `updated_user_id`, `updated_date`) VALUES
-(37, 1, 5, 24, '', 50.00, 0.00, 0.00, '', 25.00, 1125.00, 125.00, NULL, NULL, 1, '2026-06-06 09:24:26', 1, '2026-06-06 09:24:26');
 
 -- --------------------------------------------------------
 
@@ -1071,13 +1047,13 @@ ALTER TABLE `blog`
 -- AUTO_INCREMENT de tabela `budget`
 --
 ALTER TABLE `budget`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT de tabela `budget_item`
 --
 ALTER TABLE `budget_item`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
 
 --
 -- AUTO_INCREMENT de tabela `carousel`
@@ -1113,7 +1089,7 @@ ALTER TABLE `contact`
 -- AUTO_INCREMENT de tabela `expense`
 --
 ALTER TABLE `expense`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=37;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=38;
 
 --
 -- AUTO_INCREMENT de tabela `expense_type`
@@ -1155,13 +1131,13 @@ ALTER TABLE `invoicing`
 -- AUTO_INCREMENT de tabela `material`
 --
 ALTER TABLE `material`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
 
 --
 -- AUTO_INCREMENT de tabela `material_historical`
 --
 ALTER TABLE `material_historical`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=98;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=99;
 
 --
 -- AUTO_INCREMENT de tabela `material_type`
