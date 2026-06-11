@@ -1,13 +1,14 @@
 <?php
 
 require_once dirname(__FILE__) . '/../model/order.php';
+require_once dirname(__FILE__) . '/../model/budget_item.php';
 
 function budget_order_is_approved(?string $status): bool
 {
   return strcasecmp(trim((string) $status), 'Approved') === 0;
 }
 
-function budget_order_sync_if_approved(Order $order, int $budgetId, array $budgetRow): bool
+function budget_order_sync_if_approved(Order $order, int $budgetId, array $budgetRow, PDO $db): bool
 {
   if (!budget_order_is_approved($budgetRow['status'] ?? null)) {
     return true;
@@ -23,6 +24,11 @@ function budget_order_sync_if_approved(Order $order, int $budgetId, array $budge
     $internalClientId = null;
   }
 
+  $budgetItem = new BudgetItem($db);
+  $fixedCost = $budgetItem->fixedCostByBudgetId($budgetId);
+  $materialAndLaborTotal = $budgetItem->sumMaterialAndLaborTotalByBudgetId($budgetId);
+  $freight = $budgetItem->sumFreightTotalByBudgetId($budgetId);
+
   $orderData = [
     'company_id' => (int) $budgetRow['company_id'],
     'internal_client_id' => $internalClientId,
@@ -32,6 +38,8 @@ function budget_order_sync_if_approved(Order $order, int $budgetId, array $budge
     'start_date' => null,
     'install_date' => null,
     'delivery_date' => null,
+    'fixed_cost' => (($materialAndLaborTotal * $fixedCost) / 100),
+    'freight' => $freight,
     'total' => $budgetRow['sale'] ?? null,
     'notes' => null,
     'priority' => null,

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Tempo de geração: 11/06/2026 às 21:30
+-- Tempo de geração: 11/06/2026 às 23:51
 -- Versão do servidor: 10.4.32-MariaDB
 -- Versão do PHP: 8.0.30
 
@@ -116,7 +116,7 @@ CREATE TABLE `budget` (
 --
 
 INSERT INTO `budget` (`id`, `company_id`, `internal_client_id`, `number`, `status`, `cost`, `sale`, `profit`, `image_file`, `image_path`, `created_user_id`, `created_date`, `updated_user_id`, `updated_date`) VALUES
-(7, 1, 3, '1', 'draft', 465.00, 20.00, 19.56, 'img_6a2b0bf6c5f2b5.03503400.jpg', 'wwwroot/images/img_6a2b0bf6c5f2b5.03503400.jpg', 1, '2026-06-11 13:27:44', 1, '2026-06-11 16:26:53');
+(7, 1, 3, '1', 'approved', 465.00, 750.00, 285.00, 'img_6a2b0bf6c5f2b5.03503400.jpg', 'wwwroot/images/img_6a2b0bf6c5f2b5.03503400.jpg', 1, '2026-06-11 13:27:44', 1, '2026-06-11 18:50:26');
 
 -- --------------------------------------------------------
 
@@ -638,6 +638,8 @@ CREATE TABLE `order` (
   `start_date` date DEFAULT NULL,
   `install_date` date DEFAULT NULL,
   `delivery_date` date DEFAULT NULL,
+  `fixed_cost` int(11) NOT NULL,
+  `freight` decimal(10,0) NOT NULL,
   `total` decimal(15,2) NOT NULL DEFAULT 0.00,
   `notes` text DEFAULT NULL,
   `priority` varchar(50) DEFAULT NULL,
@@ -649,6 +651,13 @@ CREATE TABLE `order` (
   `updated_user_id` int(11) DEFAULT NULL,
   `updated_date` datetime DEFAULT NULL ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Despejando dados para a tabela `order`
+--
+
+INSERT INTO `order` (`id`, `company_id`, `internal_client_id`, `budget_id`, `number`, `status`, `start_date`, `install_date`, `delivery_date`, `fixed_cost`, `freight`, `total`, `notes`, `priority`, `estimated_days`, `image_file`, `image_path`, `created_user_id`, `created_date`, `updated_user_id`, `updated_date`) VALUES
+(8, 1, 3, 7, '1', 'scheduled', '0000-00-00', '0000-00-00', '0000-00-00', 15, 300, 750.00, '', '', 0, NULL, NULL, 1, '2026-06-11 13:27:44', 1, '2026-06-11 18:50:36');
 
 -- --------------------------------------------------------
 
@@ -1149,7 +1158,7 @@ ALTER TABLE `material_type`
 -- AUTO_INCREMENT de tabela `order`
 --
 ALTER TABLE `order`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT de tabela `order_item`

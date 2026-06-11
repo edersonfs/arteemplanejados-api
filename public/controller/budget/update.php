@@ -110,7 +110,7 @@ try {
     $order = new Order($db);
     $budgetRow = $budget->getById($data['id']);
 
-    if (!budget_order_sync_if_approved($order, (int) $data['id'], $budgetRow)) {
+    if (!budget_order_sync_if_approved($order, (int) $data['id'], $budgetRow, $db)) {
       echo json_encode(array("message" => "error_creating_order"));
       exit;
     }
@@ -121,5 +121,5 @@ try {
   }
 } catch (Throwable $e) {
   http_response_code(401);
-  die('EXPIRED');
+  die('EXPIRED' . $e);
 }
